@@ -4,6 +4,8 @@ import {default as managerRouter} from './manager.js';
 import {default as purchaseRouter} from './purchase.js';
 import {default as clientRouter} from './client.js';
 import {default as userRouter} from './user.js';
+import {default as typeServiceRouter} from './typeservice.js';
+import {default as serviceRouter} from './service.js';
 
 const router = Router();
 
@@ -12,5 +14,7 @@ router.use('/client', clientRouter);
 router.use('/product', productRouter);
 router.use('/manager', managerRouter);
 router.use('/purchase', purchaseRouter);
+router.use('/typeservice', typeServiceRouter);
+router.use('/service',serviceRouter);
 
 export default router;

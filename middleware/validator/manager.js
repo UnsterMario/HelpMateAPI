@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine';
 
-const clientSchema = vine.object({
+const managerSchema = vine.object({
     id: vine.number(),
     name: vine.string().trim().optional(),
     firstname: vine.string().trim().optional(),
@@ -8,4 +8,13 @@ const clientSchema = vine.object({
     password: vine.string().optional()
 });
 
-export const client = vine.compile(clientSchema);
+export const managerValidatorMiddleware = {
+    updateClient: async (req, res, next) => {
+        try {
+            req.val = await vine.compile(managerSchema).validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    }
+};
