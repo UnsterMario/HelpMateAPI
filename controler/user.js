@@ -92,6 +92,7 @@ export const adminLogin = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
+        console.log("ouais ma biche");
         const users = await userModel.getUsers(pool);
         res.json(users);
     } catch (e) {

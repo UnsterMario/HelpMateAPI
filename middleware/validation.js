@@ -2,6 +2,8 @@ import * as userValidator from './validator/user.js';
 import * as productValidator from './validator/product.js';
 import * as purchaseValidator from './validator/purchase.js';
 import * as managerValidator from './validator/manager.js';
+import * as typeServiceValidator from './validator/typeservice.js';
+import * as serviceValidator from './validator/service.js';
 
 /**
  * @swagger
@@ -77,6 +79,85 @@ export const productValidatorMiddlewares = {
     productToDelete: async(req, res, next) => {
         try {
             req.val  = await productValidator.productToDelete.validate(req.params);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    }
+};
+
+export const serviceValidatorMiddleware = {
+    create: async (req, res, next) => {
+        try {
+            req.val = await serviceValidator.create.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    update: async (req, res, next) => {
+        try {
+            req.val = await serviceValidator.update.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    delete: async (req, res, next) => {
+        try {
+            req.val = await serviceValidator.delete.validate(req.params);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    getByID: async (req, res, next) => {
+        try {
+            req.val = await serviceValidator.getByID.validate(req.params);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    getByUser: async (req, res, next) => {
+        try {
+            req.val = await serviceValidator.getByUser.validate(req.params);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+};
+
+
+export const typeServiceValidatorMiddleware = {
+    create: async (req, res, next) => {
+        try {
+            req.val = await typeServiceValidator.create.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    update: async (req, res, next) => {
+        try {
+            req.val = await typeServiceValidator.update.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    delete: async (req, res, next) => {
+        try {
+            req.val = await typeServiceValidator.delete.validate(req.params);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    getByID: async (req, res, next) => {
+        try {
+            req.val = await typeServiceValidator.getByID.validate(req.params);
             next();
         } catch (e) {
             res.status(400).send(e.messages);
