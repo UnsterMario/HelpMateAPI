@@ -30,8 +30,10 @@ CREATE TABLE AppUser  (
   CONSTRAINT FK_AppUser_localisation FOREIGN KEY (localisation) REFERENCES Localisation(localisationID)
 );
 
-INSERT INTO AppUser (lastName,firstName,telNumber,mailAddress,userPassword,isAdmin,isRestricted)
-VALUES ('John','Doe','0489675636','john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ',true,false); --password
+INSERT INTO AppUser (lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted)
+VALUES 
+  ('John', 'Doe', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false), --password
+  ('Jane', 'Smith', '0498765432', 'janeh@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$U8L1D+dk8ay9gn6HVy2DQw$YZUlS48zQk1chBaTmjVhRlU8Uq7s2GObQNz5deSsg/o', false, false);
 
 
 DROP TABLE IF EXISTS TypeService CASCADE;

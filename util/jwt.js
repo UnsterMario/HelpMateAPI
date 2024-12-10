@@ -1,7 +1,7 @@
 import 'dotenv/config.js';
 import jsonwebtoken from 'jsonwebtoken';
 
-export const sign = (payload, options) => {
+export const sign = (payload, {options}) => {
     return jsonwebtoken.sign(payload, process.env.JWT_SECRET, options);
 };
 

@@ -7,13 +7,15 @@ import {readPerson, readAdmin} from '../model/person.js';
 //ICI
 export const login = async (req, res) => {
     try {
-        const rep = await readPerson(pool, req.val);
+        const rep = await readPerson(pool, {mailAddress: req.val.mailAddress, userPassword: req.val.userPassword});
         if(rep) {
+            console.log('User logged in:', rep);
             const jwt = sign(rep, {
                 expiresIn: '8h'
             });
-            res.status(201).send(jwt);
+            res.status(201).json({ message: 'User logged in successfully', token: jwt, mailAddress: rep });
         } else {
+            console.log('User not found');
             res.sendStatus(404);
         }
     } catch (err) {
@@ -24,27 +26,37 @@ export const login = async (req, res) => {
 
 export const registration = async (req, res) => {
     try {
-        
-        const exist = await userModel.userExists(pool, req.val.mailAddress);
-        if(exist){
-            res.status(409).send('Email already used');
-        } else {
-            await userModel.createUser(pool, req.val);
-            res.sendStatus(201);
+        const emailExists = await userModel.userExistsMail(pool, {mailAddress:req.val.mailAddress});
+        const phoneExists = await userModel.userExistsTel(pool, {telNumber:req.val.telNumber});
+
+        if (phoneExists) {
+            return res.status(409).json({ message: 'Phone number already used' });
+
         }
+        if (emailExists) {
+            return res.status(409).json({ message: 'Email already used' });
+        }
+        const user = await userModel.createUser(pool, req.val);
+        const jwt = sign(user.userid, {
+            expiresIn: '8h'
+        });
+        return res.status(201).json({ message: 'User created successfully', token: jwt });
     } catch (err) {
         console.error(err);
-        res.sendStatus(500);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 
 // Requêtes pour les utilisateurs réguliers
 
 export const getMyInfo = async (req, res) => {
-    const {id} = req.session;
+    const id = req.session;
+    console.log('ID:', id);
     try {
         const info = await userModel.getUserByID(pool, id);
+        console.log('Info:', info);
         res.send(info);
     } catch (e) {
         res.sendStatus(500);
@@ -52,8 +64,10 @@ export const getMyInfo = async (req, res) => {
 };
 export const updateMe = async (req, res) => {
     try {
-        await userModel.updateMyInfo(pool, req.session.id, req.val);
-        res.sendStatus(204);
+        console.log('Update:', req.val);
+        const info = await userModel.updateMyInfo(pool, req.session, req.val);
+        console.log('Info:', info);
+        res.send(info);
     } catch (e) {
         console.error(e);
         res.sendStatus(500);
