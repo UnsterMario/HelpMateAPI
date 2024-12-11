@@ -6,12 +6,20 @@ import {hash} from '../util/index.js';
 
 
 
-export const userExists = async (SQLClient, { mailAddress }) => {
+export const userExistsMail = async (SQLClient, { mailAddress }) => {
     const {rows} = await SQLClient.query(
-        'SELECT COUNT(*) FROM AppUser WHERE mailAddress = $1',
+        `SELECT * FROM AppUser WHERE mailaddress = $1`,
         [mailAddress]
     );
-    return rows.count > 0;
+    return rows.length > 0;
+};
+
+export const userExistsTel = async (SQLClient, { telNumber }) => {
+    const {rows} = await SQLClient.query(
+        `SELECT * FROM AppUser WHERE telnumber = $1`,
+        [telNumber]
+    );
+    return rows.length > 0;
 };
 
 export const createUser = async (SQLClient, { lastName, firstName, telNumber, mailAddress, userPassword }) => {
@@ -50,7 +58,14 @@ export const getUserByID = async (clientSQL, userID) => {
     return (await clientSQL.query('SELECT userID, lastName, firstName, telNumber, mailAddress FROM AppUser WHERE userID = $1', [userID])).rows[0];
 };
 
-export const updateMyInfo = async (SQLClient, userID, {lastName, firstName, telNumber, mailAddress, userPassword}) => {
+export const updateMyInfo = async (SQLClient, userID, user) => {
+    let lastName, firstName, telNumber, mailAddress;
+    lastName = user.lastName || null;
+    firstName = user.firstName || null;
+    telNumber = user.telNumber || null;
+    mailAddress = user.mailAddress || null;
+    console.log(lastName, firstName, telNumber, mailAddress);
+
     let query = 'UPDATE AppUser SET ';
     const querySet = [];
     const queryValues = [];
@@ -63,21 +78,31 @@ export const updateMyInfo = async (SQLClient, userID, {lastName, firstName, telN
         querySet.push(`firstName = $${queryValues.length}`);
     }
     if(telNumber){
+        console.log('ici');
         queryValues.push(telNumber);
         querySet.push(`telNumber = $${queryValues.length}`);
+
     }
     if(mailAddress){
         queryValues.push(mailAddress);
         querySet.push(`mailAddress = $${queryValues.length}`);
     }
-    if(userPassword){
-        queryValues.push(await hash(userPassword));
-        querySet.push(`password = $${queryValues.length}`);
-    }
     if(queryValues.length > 0){
         queryValues.push(userID);
-        query += `${querySet.join(', ')} WHERE userID = $${queryValues.length}`;
-        return await SQLClient.query(query, queryValues);
+        query += `${querySet.join(', ')} WHERE userID = $${queryValues.length} RETURNING *`;
+        try {
+            await SQLClient.query(query, queryValues);
+            return JSON.stringify({
+                message: 'User updated successfully',
+            });
+        } catch (error) {
+            // Vérifie si l'erreur est liée à une contrainte unique
+            if (error.code === '23505') {
+                return error // PostgreSQL code pour violation de contrainte unique
+            }
+            // Autres erreurs SQL
+            throw new Error(`Erreur SQL : ${error.message}`);
+        }
     } else {
         throw new Error('No field given');
     }

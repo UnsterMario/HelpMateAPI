@@ -3,10 +3,9 @@ import {readUserByEmail} from './user.js';
 import {readAdminByEmail} from './user.js';
 
 export const readPerson = async (clientSQL, {mailAddress,userPassword }) => {
-    const client = await readUserByEmail(clientSQL, { mailAddress });
-
-    if (client && await compare(userPassword, client.userPassword)) {
-        return client.userID;
+    const client = await readUserByEmail(clientSQL, { mailAddress: mailAddress });
+    if (client && await compare(userPassword, client.userpassword)) {
+        return client.userid;
     }
 
     return null;
