@@ -64,9 +64,14 @@ export const getMyInfo = async (req, res) => {
 };
 export const updateMe = async (req, res) => {
     try {
-        console.log('Update:', req.val);
         const info = await userModel.updateMyInfo(pool, req.session, req.val);
-        console.log('Info:', info);
+        if ( info.detail && info.detail.startsWith('Key (mail')) {
+            res.status(409).json({ message: 'Email already used' });
+        }else {
+            if (info.detail && info.detail.startsWith('Key (tel')) {
+                res.status(409).json({ message: 'Phone number already used' });
+            }
+        }
         res.send(info);
     } catch (e) {
         console.error(e);

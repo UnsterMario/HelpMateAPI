@@ -90,8 +90,19 @@ export const updateMyInfo = async (SQLClient, userID, user) => {
     if(queryValues.length > 0){
         queryValues.push(userID);
         query += `${querySet.join(', ')} WHERE userID = $${queryValues.length} RETURNING *`;
-        const {rows} = await SQLClient.query(query, queryValues);
-        return rows[0]; 
+        try {
+            await SQLClient.query(query, queryValues);
+            return JSON.stringify({
+                message: 'User updated successfully',
+            });
+        } catch (error) {
+            // Vérifie si l'erreur est liée à une contrainte unique
+            if (error.code === '23505') {
+                return error // PostgreSQL code pour violation de contrainte unique
+            }
+            // Autres erreurs SQL
+            throw new Error(`Erreur SQL : ${error.message}`);
+        }
     } else {
         throw new Error('No field given');
     }
