@@ -118,4 +118,19 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+export const getUserById = async (req, res) => {
+    try {
+        const { id } = req.params; // Extraction de l'identifiant à partir des paramètres de la requête
+        const user = await userModel.getUserByID(pool, id); // Appel au modèle pour récupérer l'utilisateur
+        if (user) {
+            res.status(200).json(user); // Retourne les informations utilisateur
+        } else {
+            res.status(404).send('User not found'); // Gère le cas où l'utilisateur n'existe pas
+        }
+    } catch (error) {
+        console.error('Error fetching user by ID:', error);
+        res.sendStatus(500); // Gère les erreurs internes
+    }
+};
+
 
