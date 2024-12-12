@@ -1,10 +1,50 @@
 import {pool} from '../database/database.js';
 import * as userModel from '../model/user.js';
-import {sign} from '../util/jwt.js';
+import {sign, verify} from '../util/jwt.js';
 import {readPerson, readAdmin} from '../model/person.js';
 
 
 //ICI
+
+export const checkAuth = async (req, res) => {
+    try {
+        // Récupérer le JWT depuis l'en-tête Authorization
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Token manquant ou invalide' });
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        // Vérifier le JWT
+        const decoded = verify(token);
+        console.log('Decoded:', decoded);
+
+        if (!decoded) {
+            return res.status(401).json({ message: 'Token invalide' });
+        }
+
+        // Rechercher l'utilisateur dans la base de données
+        const user = await userModel.getUserByID(pool, decoded);
+
+        if (!user) {
+            return res.status(401).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        // Retourner l'utilisateur si tout est valide
+        return res.status(200).json({ message: 'Authentification réussie', user: user.lastname });
+    } catch (err) {
+        // Gérer les erreurs liées au JWT (ex: expiré, signature invalide)
+        console.error(err);
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token expiré' });
+        }
+        return res.status(500).json({ message: 'Erreur interne au serveur' });
+    }
+};
+
+
 export const login = async (req, res) => {
     try {
         const rep = await readPerson(pool, {mailAddress: req.val.mailAddress, userPassword: req.val.userPassword});
@@ -80,12 +120,12 @@ export const updateMe = async (req, res) => {
 };
 
 export const deleteMe = async (req, res) => {
-    const {id} = req.session;
+    const id = req.session;
     try {
         await userModel.deleteMyAccount(pool, id);
-        res.sendStatus(204);
+        res.status(200).json({ message: 'User deleted successfully' });
     } catch (e) {
-        res.sendStatus(500);
+        res.status(500).json({ message: 'Erreur serveur' });
     }
 };
 
