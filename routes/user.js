@@ -17,7 +17,8 @@ import {
     adminLogin,
     getAllUsers,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUserById
 } from '../controler/user.js';
 
 
@@ -32,6 +33,7 @@ const router = Router();
 router.post('/login', UVM.login, login);
 router.post('/registration', UVM.user, registration);
 router.get('/me', checkJWT, getMyInfo);
+router.get('/:id', getUserById);
 router.patch('/me', checkJWT, UVM.update, updateMe);
 router.delete('/me', checkJWT, deleteMe);
 router.post('/auth',checkJWT, checkAuth);

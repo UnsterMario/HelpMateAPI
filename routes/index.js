@@ -6,6 +6,8 @@ import {default as clientRouter} from './client.js';
 import {default as userRouter} from './user.js';
 import {default as typeServiceRouter} from './typeservice.js';
 import {default as serviceRouter} from './service.js';
+import {default as conversationRouter} from './conversation.js';
+import {default as messageRouter} from './message.js';
 
 const router = Router();
 
@@ -16,5 +18,7 @@ router.use('/manager', managerRouter);
 router.use('/purchase', purchaseRouter);
 router.use('/typeservice', typeServiceRouter);
 router.use('/service',serviceRouter);
+router.use('/conversation',conversationRouter);
+router.use('/message',messageRouter);
 
 export default router;

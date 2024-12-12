@@ -30,10 +30,13 @@ CREATE TABLE AppUser  (
                           CONSTRAINT FK_AppUser_localisation FOREIGN KEY (localisation) REFERENCES Localisation(localisationID)
 );
 
+-- Ajout d'utilisateurs dans AppUser
 INSERT INTO AppUser (lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted)
 VALUES 
-  ('John', 'Doe', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false), --password
-  ('Jane', 'Smith', '0498765432', 'janeh@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$U8L1D+dk8ay9gn6HVy2DQw$YZUlS48zQk1chBaTmjVhRlU8Uq7s2GObQNz5deSsg/o', false, false);
+('Doe', 'John', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false), -- admin
+('Smith', 'Alice', '0490123456', 'alice@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false),
+('Brown', 'Charlie', '0489001122', 'charlie@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false),
+('Johnson', 'Diana', '0489556677', 'diana@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, true); -- restricted
 
 
 DROP TABLE IF EXISTS TypeService CASCADE;
@@ -89,30 +92,43 @@ INSERT INTO Service (title, serviceDescription, authorUser, providerUser, servic
 VALUES
 ('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 1, 1, 3, 49.6958546, 5.4045261);
 
-
-
-DROP TABLE IF EXISTS ServiceTransaction CASCADE;
-
 DROP TABLE IF EXISTS Conversation CASCADE;
 
+-- Table des Conversations
 CREATE TABLE Conversation (
-                              user1 INT NOT NULL,
-                              user2 INT NOT NULL,
-                              PRIMARY KEY (user1, user2),
-                              CONSTRAINT FK_Conversation_user1 FOREIGN KEY (user1) REFERENCES AppUser(userID),
-                              CONSTRAINT FK_Conversation_user2 FOREIGN KEY (user2) REFERENCES AppUser(userID),
-                              CONSTRAINT CHK_Conversation_Order CHECK (user1 < user2)
+    conversationID SERIAL PRIMARY KEY, -- Ajout d'un identifiant unique pour chaque conversation
+    user1 INT NOT NULL,
+    user2 INT NOT NULL,
+    CONSTRAINT FK_Conversation_user1 FOREIGN KEY (user1) REFERENCES AppUser(userID) ON DELETE CASCADE,
+    CONSTRAINT FK_Conversation_user2 FOREIGN KEY (user2) REFERENCES AppUser(userID) ON DELETE CASCADE,
+    CONSTRAINT CHK_Conversation_Order CHECK (user1 < user2)
 );
 
+-- Conversations entre les utilisateurs
+INSERT INTO Conversation (user1, user2)
+VALUES 
+(1, 2), -- John (admin) et Alice
+(1, 3), -- John et Charlie
+(2, 3), -- Alice et Charlie
+(2, 4); -- Alice et Diana
 
 DROP TABLE IF EXISTS Message CASCADE;
 
+-- Table des Messages
 CREATE TABLE Message (
-                         messageID INT PRIMARY KEY,
-                         sendDate DATE NOT NULL,
-                         content VARCHAR(250) NOT NULL CHECK( LENGTH(content)>0),
-                         user1 INT NOT NULL,
-                         user2 INT NOT NULL,
-                         CONSTRAINT FK_Message_conversation FOREIGN KEY (user1, user2) REFERENCES Conversation(user1, user2),
-                         CONSTRAINT CHK_Message_Order CHECK (user1 < user2)
+    messageID SERIAL PRIMARY KEY,
+    sendDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    content TEXT NOT NULL CHECK (LENGTH(content) > 0),
+    conversationID INT NOT NULL,  -- Référence à l'ID de la conversation
+    senderID INT NOT NULL,
+    CONSTRAINT FK_Message_conversation FOREIGN KEY (conversationID) REFERENCES Conversation(conversationID) ON DELETE CASCADE,
+    CONSTRAINT FK_Message_sender FOREIGN KEY (senderID) REFERENCES AppUser(userID) ON DELETE CASCADE
 );
+
+-- Exemple de messages
+INSERT INTO Message (conversationID, senderID, content, sendDate)
+VALUES
+(1, 1, 'Salut Alice, comment ça va ?', '2024-10-11T16:06:43.676Z'), -- John envoie un message à Alice
+(1, 2, 'Très bien merci John, et toi ?', '2024-11-11T16:06:43.676Z'), -- Alice répond
+(2, 1, 'Charlie, on se voit demain ?', '2024-09-11T16:06:43.676Z'); -- John envoie un message à Charlie
+
