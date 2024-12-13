@@ -9,6 +9,7 @@ import {
     login,
     registration,
     //normal user
+    checkAuth,
     getMyInfo,
     updateMe,
     deleteMe,
@@ -35,6 +36,7 @@ router.get('/me', checkJWT, getMyInfo);
 router.get('/:id', getUserById);
 router.patch('/me', checkJWT, UVM.update, updateMe);
 router.delete('/me', checkJWT, deleteMe);
+router.post('/auth',checkJWT, checkAuth);
 
 // Routes pour les administrateurs
 router.post('/admin/login', UVM.login,adminLogin);
