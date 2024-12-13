@@ -5,7 +5,7 @@ import {
     getServiceByIDHandler,
     updateServiceHandler,
     deleteServiceHandler,
-    getServicesByUserHandler
+    getServicesByUserHandler,
 } from '../controler/service.js';
 
 import { checkJWT } from '../middleware/identification/jwt.js';

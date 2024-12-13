@@ -35,15 +35,13 @@ export const getConversationID = async ({ user1, user2, pool }) => {
     if (!pool) {
         throw new Error('Le pool de base de données n\'est pas défini');
     }
-
     const query = `
         SELECT conversationid
         FROM Conversation
         WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)
         LIMIT 1;
     `;
-    const values = [user1, user2];
-
+    const values = [parseInt(user1), parseInt(user2)]; // Ensure integers
     try {
         console.log('Executing query:', query);
         console.log('With values:', values);
@@ -51,13 +49,14 @@ export const getConversationID = async ({ user1, user2, pool }) => {
         const result = await pool.query(query, values);
         
         if (result.rows.length > 0) {
-            return result.rows[0].conversationid;  // Retourne l'ID de la conversation
+            return result.rows[0].conversationid;  // Return conversation ID
         }
-        return null;  // Si aucune conversation n'est trouvée
+        return null;  // No conversation found
     } catch (error) {
         console.error('Error executing query:', error);
         throw error;
     }
 };
+
 
 

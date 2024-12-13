@@ -172,3 +172,5 @@ export const updateUser = async (SQLClient, userID, {lastName, firstName, telNum
 export const deleteUser = async (SQLClient, userID) => {
     return await SQLClient.query('DELETE FROM AppUser WHERE userID = $1', [userID]);
 };
+
+
