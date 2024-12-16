@@ -81,17 +81,17 @@ CREATE TABLE Service (
 -- Exemple 1: Service de Jardinage par Alice
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 2, 1, 1, 49.7008546, 5.4065261);
+('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 2, 1, 1, 50.4631551, 4.8619083);
 
 -- Exemple 2: Service d\'Animaux par Bob
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 3, 1, 2, 49.7028546, 5.4075261);
+('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 3, 1, 2, 50.4639551, 4.8659083);
 
 -- Exemple 3: Service de Garde d\'Enfants par Charlie
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 4, 1, 3, 49.6958546, 5.4045261);
+('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 4, 1, 3, 50.4675551, 4.8699083);
 
 DROP TABLE IF EXISTS Conversation CASCADE;
 

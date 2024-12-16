@@ -1,10 +1,12 @@
 import express from 'express';
-import { createConversationHandler, getConversationsHandler, getConversationIDHandler } from '../controler/conversation.js';
+import { createConversationHandler, getConversationsHandler, getConversationIDHandler, conversationExistsHandler } from '../controler/conversation.js';
 
 const router = express.Router();
 
 router.post('/', createConversationHandler);
 router.get('/:userID', getConversationsHandler);
 router.get('/conversation-between/:user1/:user2', getConversationIDHandler);
+router.get('/exists/:user1/:user2', conversationExistsHandler);
+
 
 export default router;

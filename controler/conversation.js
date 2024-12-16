@@ -1,4 +1,4 @@
-import { createConversation, getConversationsByUser, getConversationID } from '../model/conversation.js';
+import { createConversation, getConversationsByUser, getConversationID, conversationExists } from '../model/conversation.js';
 import { pool } from '../database/database.js';
 
 export const createConversationHandler = async (req, res) => {
@@ -7,8 +7,8 @@ export const createConversationHandler = async (req, res) => {
         if (user1 >= user2) {
             return res.status(400).json({ error: 'user1 must be less than user2' });
         }
-        await createConversation({ pool, user1, user2 });
-        res.status(201).json({ message: 'Conversation created successfully' });
+        const conversation = await createConversation({ pool, user1, user2 });
+        res.status(201).json({ message: 'Conversation created successfully', conversationID: conversation.conversationid });
     } catch (error) {
         console.error('Error creating conversation:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -45,4 +45,20 @@ export const getConversationIDHandler = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+export const conversationExistsHandler = async (req, res) => {
+    const { user1, user2 } = req.params; // Récupération depuis req.params
+    try {
+        const exists = await conversationExists({ 
+            pool, 
+            user1: parseInt(user1, 10), // Assurez-vous que ce sont des entiers
+            user2: parseInt(user2, 10),
+        });
+        res.status(200).json({ exists });
+    } catch (error) {
+        console.error('Error checking conversation:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 

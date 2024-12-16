@@ -21,6 +21,6 @@ router.get('/user/:userID/services', getServicesByUserHandler); // Récupérer l
 // Routes protégées (authentification requise)
 router.post('/service', checkJWT, SVM.create, createServiceHandler); // Créer un service
 router.patch('/service/:id', checkJWT, SVM.update, updateServiceHandler); // Mettre à jour un service
-router.delete('/service/:id', checkJWT, deleteServiceHandler); // Supprimer un service
+router.delete('/:id', checkJWT, deleteServiceHandler); // Supprimer un service
 
 export default router;
