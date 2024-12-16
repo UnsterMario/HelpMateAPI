@@ -1,4 +1,4 @@
-import { createConversation, getConversationsByUser, getConversationID, getAllConversations } from '../model/conversation.js';
+import { createConversation, getConversationsByUser, getConversationID, conversationExists, getAllConversations } from '../model/conversation.js';
 import { pool } from '../database/database.js';
 
 export const createConversationHandler = async (req, res) => {
@@ -7,8 +7,8 @@ export const createConversationHandler = async (req, res) => {
         if (user1 >= user2) {
             return res.status(400).json({ error: 'user1 must be less than user2' });
         }
-        await createConversation({ pool, user1, user2 });
-        res.status(201).json({ message: 'Conversation created successfully' });
+        const conversation = await createConversation({ pool, user1, user2 });
+        res.status(201).json({ message: 'Conversation created successfully', conversationID: conversation.conversationid });
     } catch (error) {
         console.error('Error creating conversation:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -37,19 +37,38 @@ export const getAllConversationsHandler = async (req, res) => {
 }
 
 export const getConversationIDHandler = async (req, res) => {
-    const { user1, user2 } = req.params; // Récupère les utilisateurs à partir des paramètres de la requête
+    const { user1, user2 } = req.params; // Get users from request parameters
     try {
-        // Appelle la fonction getConversationID du modèle pour obtenir l'ID de la conversation
-        const conversationID = await getConversationID({ user1: parseInt(user1), user2: parseInt(user2), pool });
+        const conversationID = await getConversationID({
+            user1: parseInt(user1, 10), // Parse as integers
+            user2: parseInt(user2, 10), // Parse as integers
+            pool,
+        });
 
         if (!conversationID) {
-            return res.status(404).json({ error: 'Conversation not found' }); // Si la conversation n'existe pas
+            return res.status(404).json({ error: 'Conversation not found' });
         }
 
-        // Renvoie l'ID de la conversation
         res.status(200).json({ conversationID });
     } catch (error) {
         console.error('Error retrieving conversation ID:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+export const conversationExistsHandler = async (req, res) => {
+    const { user1, user2 } = req.params; // Récupération depuis req.params
+    try {
+        const exists = await conversationExists({ 
+            pool, 
+            user1: parseInt(user1, 10), // Assurez-vous que ce sont des entiers
+            user2: parseInt(user2, 10),
+        });
+        res.status(200).json({ exists });
+    } catch (error) {
+        console.error('Error checking conversation:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+

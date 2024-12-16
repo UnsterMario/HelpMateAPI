@@ -46,11 +46,12 @@ CREATE TABLE AppUser  (
 
 -- Ajout d'utilisateurs dans AppUser
 INSERT INTO AppUser (lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted)
-VALUES 
+VALUES
+('System','System','0000000000','system@mail.com','$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false),
 ('Doe', 'John', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false), -- admin
 ('Smith', 'Alice', '0490123456', 'alice@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false),
 ('Brown', 'Charlie', '0489001122', 'charlie@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false),
-('Johnson', 'Diana', '0489556677', 'diana@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, true); -- restricted
+('Johnson', 'Diana', '0489556677', 'diana@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false); -- restricted
 
 
 DROP TABLE IF EXISTS TypeService CASCADE;
@@ -94,16 +95,19 @@ CREATE TABLE Service (
 -- Exemple 1: Service de Jardinage par Alice
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
+('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 2, 1, 1, 50.4631551, 4.8619083);
 ('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 1, 3, 3, 49.7008546, 5.4065261);
 
 -- Exemple 2: Service d\'Animaux par Bob
 INSERT INTO Service (title, serviceDescription, authorUser, serviceType, latitude, longitude)
 VALUES
+('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 3, 1, 2, 50.4639551, 4.8659083);
 ('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 2, 1, 49.7028546, 5.4075261);
 
 -- Exemple 3: Service de Garde d\'Enfants par Charlie
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
+('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 4, 1, 3, 50.4675551, 4.8699083);
 ('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 1, 2, 2, 49.6958546, 5.4045261);
 
 DROP TABLE IF EXISTS Conversation CASCADE;
@@ -121,10 +125,10 @@ CREATE TABLE Conversation (
 -- Conversations entre les utilisateurs
 INSERT INTO Conversation (user1, user2)
 VALUES 
-(1, 2), -- John (admin) et Alice
-(1, 3), -- John et Charlie
-(2, 3), -- Alice et Charlie
-(2, 4); -- Alice et Diana
+(2, 3), -- John (admin) et Alice
+(2, 4), -- John et Charlie
+(3, 4), -- Alice et Charlie
+(3, 5); -- Alice et Diana
 
 DROP TABLE IF EXISTS Message CASCADE;
 
@@ -139,10 +143,14 @@ CREATE TABLE Message (
     CONSTRAINT FK_Message_sender FOREIGN KEY (senderID) REFERENCES AppUser(userID) ON DELETE CASCADE
 );
 
+
+
 -- Exemple de messages
 INSERT INTO Message (conversationID, senderID, content, sendDate)
 VALUES
-(1, 1, 'Salut Alice, comment ça va ?', '2024-10-11T16:06:43.676Z'), -- John envoie un message à Alice
-(1, 2, 'Très bien merci John, et toi ?', '2024-11-11T16:06:43.676Z'), -- Alice répond
-(2, 1, 'Charlie, on se voit demain ?', '2024-09-11T16:06:43.676Z'); -- John envoie un message à Charlie
+(1, 2, 'Salut Alice, comment ça va ?', '2024-10-11T16:06:43.676Z'), -- John envoie un message à Alice
+(1, 3, 'Très bien merci John, et toi ?', '2024-11-11T16:06:43.676Z'), -- Alice répond
+(2, 2, 'Charlie, on se voit demain ?', '2024-09-11T16:06:43.676Z'), -- John envoie un message à Charlie
+(3, 3, 'Salut Charlie', '2024-09-11T16:06:43.676Z'),
+(4, 3, 'Diana, on se voit quand ?', '2024-09-11T16:06:43.676Z');
 

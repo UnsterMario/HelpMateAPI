@@ -4,7 +4,7 @@ export const createMessage = async ({ conversationID, senderID, content, pool })
     if (!conversationID || !senderID || !content) {
         throw new Error('Les paramètres conversationID, senderID, et content sont requis');
     }
-
+    console.log("dans create : ",conversationID, senderID, content);
     const query = `
     INSERT INTO Message (conversationID, senderID, content, sendDate)
     VALUES ($1, $2, $3, NOW())
