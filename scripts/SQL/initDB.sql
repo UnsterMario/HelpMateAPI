@@ -4,14 +4,28 @@ DROP TABLE IF EXISTS product CASCADE;
 DROP TABLE IF EXISTS purchase CASCADE;
 
 
+DROP TABLE IF EXISTS About_us CASCADE;
 
-DROP TABLE IF EXISTS Localisation CASCADE;
-
-CREATE TABLE Localisation (
-                              localisationID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                              latitude DECIMAL(9,6) NOT NULL,
-                              longitude DECIMAL(9,6) NOT NULL
+CREATE TABLE About_us (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,                -- Identifiant unique
+    content TEXT NOT NULL,                -- Texte pour la section "À propos de nous"
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Date de dernière modification
 );
+
+INSERT INTO About_us (content) VALUES (
+    'HelpMate est une application développée par l''équipe JeF pour rapprocher les voisins et faciliter l''entraide au quotidien.
+
+
+    Que ce soit pour un petit service, un coup de main ou une tâche plus spécifique, HelpMate. permet de mettre en relation les personnes à proximité qui cherchent à s''entraider.
+
+
+    Avec une interface simple et intuitive, vous pouvez poster ou accepter des demandes et contribuer à une communauté plus solidaire.
+
+
+    Rejoignez-nous dans cette aventure et devenez un acteur de l''entraide locale !'
+);
+
+
 
 DROP TABLE IF EXISTS AppUser CASCADE;
 
@@ -80,17 +94,17 @@ CREATE TABLE Service (
 -- Exemple 1: Service de Jardinage par Alice
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 1, 1, 1, 49.7008546, 5.4065261);
+('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 1, 3, 3, 49.7008546, 5.4065261);
 
 -- Exemple 2: Service d\'Animaux par Bob
-INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
+INSERT INTO Service (title, serviceDescription, authorUser, serviceType, latitude, longitude)
 VALUES
-('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 1, 1, 2, 49.7028546, 5.4075261);
+('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 2, 1, 49.7028546, 5.4075261);
 
 -- Exemple 3: Service de Garde d\'Enfants par Charlie
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 1, 1, 3, 49.6958546, 5.4045261);
+('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 1, 2, 2, 49.6958546, 5.4045261);
 
 DROP TABLE IF EXISTS Conversation CASCADE;
 

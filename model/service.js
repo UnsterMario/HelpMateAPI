@@ -81,7 +81,7 @@ export const updateService = async (serviceID, {
     }
 };
 
-export const deleteService = async (serviceID) => {
+export const deleteService = async (serviceID, pool) => {
     return await pool.query('DELETE FROM Service WHERE serviceID = $1', [serviceID]);
 };
 

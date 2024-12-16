@@ -4,6 +4,7 @@ import * as purchaseValidator from './validator/purchase.js';
 import * as managerValidator from './validator/manager.js';
 import * as typeServiceValidator from './validator/typeservice.js';
 import * as serviceValidator from './validator/service.js';
+import * as aboutUsValidator from './validator/aboutus.js';
 
 /**
  * @swagger
@@ -16,6 +17,26 @@ import * as serviceValidator from './validator/service.js';
  *                  schema:
  *                      type: string
  */
+
+export const aboutUsValidatorMiddleware = {
+    create: async (req, res, next) => {
+        try {
+            req.val = await aboutUsValidator.create.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    update: async (req, res, next) => {
+        try {
+            req.val = await aboutUsValidator.update.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+};
+
 export const userValidatorMiddleware = {
     login: async (req, res, next) => {
         try {

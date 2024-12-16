@@ -103,7 +103,7 @@ export const deleteServiceHandler = async (req, res) => {
             return res.status(400).json({ error: 'Service ID is required' });
         }
 
-        await deleteService(serviceID);
+        await deleteService(serviceID, pool);
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting Service:', error);

@@ -122,7 +122,7 @@ export const updateMe = async (req, res) => {
 export const deleteMe = async (req, res) => {
     const id = req.session;
     try {
-        await userModel.deleteMyAccount(pool, id);
+        await userModel.deleteUser(pool, id);
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (e) {
         res.status(500).json({ message: 'Erreur serveur' });
@@ -136,15 +136,38 @@ export const adminLogin = async (req, res) => {
         const user = await readAdmin(pool, req.val);
         if (user && user.isAdmin) { 
             const jwt = sign({ userID: user.userID, isAdmin: user.isAdmin },{
-                expiresIn: '8h'
+                expiresIn: '24h'
             });
             console.log('Generated JWT:', jwt);
-            res.status(201).send(jwt);
+            res.status(201).json({
+                token: jwt,
+                user: {
+                    lastName: user.lastName,
+                    firstName: user.firstName,
+                }
+            });
         } else {
             res.sendStatus(403); 
         }
     } catch (err) {
         console.error('Error during admin login:', err);
+        res.sendStatus(500);
+    }
+};
+
+export const registrationAdmin = async (req, res) => {
+    try {
+        
+        const exist = await userModel.userExistsMail(pool, req.val.mailAddress);
+        if(exist){
+            res.status(409).send('Email already used');
+        } else {
+            const newUser = await userModel.createUserAdmin(pool, req.val);
+            // renvoyer l'utilisateur créé
+            res.json(newUser).status(201);
+        }
+    } catch (err) {
+        console.error(err);
         res.sendStatus(500);
     }
 };
@@ -160,8 +183,9 @@ export const getAllUsers = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     try {
-        await userModel.updateUser(pool, req.params.id, req.val);
-        res.sendStatus(204);
+        
+        const updatedUser = await userModel.updateUser(pool, req.params.id, req.val);
+        res.json(updatedUser).status(204);
     } catch (e) {
         res.sendStatus(500);
     }

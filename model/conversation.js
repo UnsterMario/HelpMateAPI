@@ -31,6 +31,11 @@ export const getConversationsByUser = async ({ pool, userID }) => {
     return rows; // Retourne la liste des conversations
 };
 
+export const getAllConversations = async ({ pool }) => {
+    const { rows } = await pool.query('SELECT * FROM Conversation');
+    return rows; // Retourne la liste des conversations
+}
+
 export const getConversationID = async ({ user1, user2, pool }) => {
     if (!pool) {
         throw new Error('Le pool de base de données n\'est pas défini');
