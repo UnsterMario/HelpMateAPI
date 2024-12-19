@@ -505,27 +505,6 @@ export const getUserById = async (req, res) => {
 };
 
 
-export const registration = async (req, res) => {
-    try {
-        const emailExists = await userModel.userExistsMail(pool, { mailAddress: req.val.mailAddress });
-        const phoneExists = await userModel.userExistsTel(pool, { telNumber: req.val.telNumber });
-
-        if (phoneExists) {
-            return res.status(409).json({ message: 'Phone number already used' });
-        }
-        if (emailExists) {
-            return res.status(409).json({ message: 'Email already used' });
-        }
-
-        const user = await userModel.createUser(pool, req.val);
-        console.log('User created dans regi:', user);
-        const jwt = sign({ userID : user }, { expiresIn: '8h' });
-        return res.status(201).json({ message: 'User created successfully', token: jwt });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-};
 
 export const registerUserWithService = async (req, res) => {
     let SQLClient;  
