@@ -11,9 +11,9 @@ const options = {
     },
     // Path to the API docs
     apis: [
-        './controler/**/*.js',
+        './controler/*.js',
         './middleware/**/*.js',
-        './routes/**/*.js',
+        './routes/*.js',
     ],
 };
 

@@ -3,9 +3,44 @@ import * as userModel from '../model/user.js';
 import {sign, verify} from '../util/jwt.js';
 import {readPerson, readAdmin} from '../model/person.js';
 
-
-//ICI
-
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *      user:
+ *          type: object
+ *          properties:
+ *              userID:
+ *                  type: integer
+ *              firstName:
+ *                  type: string
+ *              lastName:
+ *                  type: string
+ *              telNumber:
+ *                  type: string
+ *              mailAddress:
+ *                  type: string
+ *              userPassword:
+ *                  type: string
+ *              isAdmin:
+ *                  type: boolean
+ *              isRestricted:
+ *                  type: boolean
+ */
+/**
+ * @swagger
+ * /auth:
+ *   post:
+ *     summary: Check authentication
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Authenticated
+ *       401:
+ *         description: Unauthorized
+ */
 export const checkAuth = async (req, res) => {
     try {
         // Récupérer le JWT depuis l'en-tête Authorization
@@ -44,7 +79,31 @@ export const checkAuth = async (req, res) => {
     }
 };
 
-
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: User login
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mailAddress:
+ *                 type: string
+ *               userPassword:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User logged in successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
 export const login = async (req, res) => {
     try {
         const rep = await readPerson(pool, {mailAddress: req.val.mailAddress, userPassword: req.val.userPassword});
@@ -64,6 +123,33 @@ export const login = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /registration:
+ *   post:
+ *     summary: User registration
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mailAddress:
+ *                 type: string
+ *               userPassword:
+ *                 type: string
+ *               telNumber:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       409:
+ *         description: Email or phone number already used
+ *       500:
+ *         description: Internal server error
+ */
 export const registration = async (req, res) => {
     try {
         const emailExists = await userModel.userExistsMail(pool, {mailAddress:req.val.mailAddress});
@@ -87,10 +173,20 @@ export const registration = async (req, res) => {
     }
 };
 
-
-
-// Requêtes pour les utilisateurs réguliers
-
+/**
+ * @swagger
+ * /me:
+ *   get:
+ *     summary: Get my info
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User info
+ *       500:
+ *         description: Internal server error
+ */
 export const getMyInfo = async (req, res) => {
     const id = req.session;
     console.log('ID:', id);
@@ -102,6 +198,34 @@ export const getMyInfo = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
+/**
+ * @swagger
+ * /me:
+ *   patch:
+ *     summary: Update my info
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mailAddress:
+ *                 type: string
+ *               telNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated
+ *       409:
+ *         description: Email or phone number already used
+ *       500:
+ *         description: Internal server error
+ */
 export const updateMe = async (req, res) => {
     try {
         const info = await userModel.updateMyInfo(pool, req.session, req.val);
@@ -119,6 +243,20 @@ export const updateMe = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /me:
+ *   delete:
+ *     summary: Delete my account
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       500:
+ *         description: Internal server error
+ */
 export const deleteMe = async (req, res) => {
     const id = req.session;
     try {
@@ -129,8 +267,31 @@ export const deleteMe = async (req, res) => {
     }
 };
 
-// Requêtes pour les administrateurs
-
+/**
+ * @swagger
+ * /admin/login:
+ *   post:
+ *     summary: Admin login
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mailAddress:
+ *                 type: string
+ *               userPassword:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Admin logged in successfully
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
 export const adminLogin = async (req, res) => {
     try {
         const user = await readAdmin(pool, req.val);
@@ -155,6 +316,35 @@ export const adminLogin = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /admin/users:
+ *   post:
+ *     summary: Register a new admin user
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mailAddress:
+ *                 type: string
+ *               userPassword:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Admin user created
+ *       409:
+ *         description: Email already used
+ *       500:
+ *         description: Internal server error
+ */
 export const registrationAdmin = async (req, res) => {
     try {
         
@@ -172,6 +362,20 @@ export const registrationAdmin = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /admin/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *       500:
+ *         description: Internal server error
+ */
 export const getAllUsers = async (req, res) => {
     try {
         const users = await userModel.getUsers(pool);
@@ -181,6 +385,38 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /admin/users/{id}:
+ *   patch:
+ *     summary: Update user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mailAddress:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       204:
+ *         description: User updated
+ *       500:
+ *         description: Internal server error
+ */
 export const updateUser = async (req, res) => {
     try {
         const updatedUser = await userModel.updateUser(pool, req.params.id, req.val);
@@ -190,6 +426,27 @@ export const updateUser = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /admin/users/{id}:
+ *   delete:
+ *     summary: Delete user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       204:
+ *         description: User deleted
+ *       500:
+ *         description: Internal server error
+ */
 export const deleteUser = async (req, res) => {
     try {
         await userModel.deleteUser(pool, req.params.id);
@@ -199,6 +456,27 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User info
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params; // Extraction de l'identifiant à partir des paramètres de la requête
