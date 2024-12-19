@@ -1,6 +1,11 @@
 import express from 'express';
-import { createConversationHandler, getConversationsHandler, getConversationIDHandler, conversationExistsHandler } from '../controler/conversation.js';
-import { createConversationHandler, getConversationsHandler, getAllConversationsHandler } from '../controler/conversation.js';
+import { createConversationHandler, 
+    getConversationsHandler, 
+    getConversationIDHandler, 
+    conversationExistsHandler,
+    getAllConversationsHandler
+ } from '../controler/conversation.js';
+
 import {checkJWT} from '../middleware/identification/jwt.js';
 
 const router = express.Router();

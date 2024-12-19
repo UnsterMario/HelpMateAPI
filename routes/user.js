@@ -42,7 +42,7 @@ router.post('/auth',checkJWT, checkAuth);
 router.post('/admin/login', UVM.login,adminLogin);
 router.post('/admin/users', checkJWT, checkAdmin, UVM.admin, registrationAdmin);
 router.get('/admin/users', checkJWT, checkAdmin, getAllUsers);
-router.patch('/admin/users/:id/role', checkJWT, checkAdmin, UVM.update, updateUser);
+router.patch('/admin/users/:id', checkJWT, checkAdmin, UVM.update, updateUser);
 router.delete('/admin/users/:id', checkJWT, checkAdmin, deleteUser);
 
 export default router;

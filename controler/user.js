@@ -183,7 +183,6 @@ export const getAllUsers = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     try {
-        
         const updatedUser = await userModel.updateUser(pool, req.params.id, req.val);
         res.json(updatedUser).status(204);
     } catch (e) {

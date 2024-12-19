@@ -76,3 +76,16 @@ export const getLastMessageByConversation = async ({ conversationID, pool }) => 
     const result = await pool.query(query, values);
     return result.rows[0];  // Retourne le dernier message de la conversation
 };
+
+export const updateMessage = async ({ messageID, content, pool }) => {
+    const query = `
+        UPDATE Message
+        SET content = $1
+        WHERE messageID = $2
+        RETURNING *;
+    `;
+    const values = [content, messageID];
+
+    const result = await pool.query(query, values);
+    return result.rows[0];  // Retourne le message modifié
+}

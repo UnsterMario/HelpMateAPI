@@ -32,8 +32,21 @@ export const getConversationsByUser = async ({ pool, userID }) => {
 };
 
 export const getAllConversations = async ({ pool }) => {
-    const { rows } = await pool.query('SELECT * FROM Conversation');
-    return rows; // Retourne la liste des conversations
+    const { rows } = await pool.query(`SELECT 
+    c.conversationID,
+    u1.userID AS user1ID, 
+    u1.firstName AS user1FirstName, 
+    u1.lastName AS user1LastName,
+    u2.userID AS user2ID, 
+    u2.firstName AS user2FirstName, 
+    u2.lastName AS user2LastName
+FROM 
+    Conversation c
+JOIN 
+    AppUser u1 ON c.user1 = u1.userID
+JOIN 
+    AppUser u2 ON c.user2 = u2.userID;`);
+    return rows; // Retourne la liste des conversations avec les noms des utilisateurs
 }
 
 export const getConversationID = async ({ user1, user2, pool }) => {
