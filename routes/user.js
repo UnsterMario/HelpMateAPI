@@ -13,14 +13,13 @@ import {
     checkAuth,
     getMyInfo,
     updateMe,
-    deleteMe,
     registerUserWithService,
     //admin user
     registrationAdmin,
     adminLogin,
     getAllUsers,
     updateUser,
-    deleteUser,
+    deleteMe,
     getUserById,
 } from '../controler/user.js';
 
@@ -39,7 +38,7 @@ router.post('/registration', UVM.user, registration);
 router.get('/me', checkJWT, getMyInfo);
 router.get('/:id', getUserById);
 router.patch('/me', checkJWT, UVM.update, updateMe);
-router.delete('/me', checkJWT, deleteUser);
+router.delete('/me', checkJWT, deleteMe);
 router.post('/auth',checkJWT, checkAuth);
 router.post('/registration-with-service', UVM.userWithService, registerUserWithService);
 
