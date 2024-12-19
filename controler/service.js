@@ -10,6 +10,7 @@ import {pool} from '../database/database.js';
 
 
 export const createServiceHandler = async (req, res) => {
+    console.log('createServiceHandler : ', req.body);
     try {
         const { 
             title, 

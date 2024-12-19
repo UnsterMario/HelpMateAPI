@@ -1,5 +1,6 @@
 import {pool} from '../database/database.js';
 import * as userModel from '../model/user.js';
+import {createService} from '../model/service.js';
 import {sign, verify} from '../util/jwt.js';
 import {readPerson, readAdmin} from '../model/person.js';
 
@@ -188,13 +189,24 @@ export const registration = async (req, res) => {
  *         description: Internal server error
  */
 export const getMyInfo = async (req, res) => {
-    const id = req.session;
-    console.log('ID:', id);
     try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = verify(token);
+        console.log('Decoded:', decoded);
+
+       // Vérifiez si le token décodé est un objet ou un nombre
+       const id = typeof decoded === 'object' ? decoded.userID : decoded;
+       if (!id) {
+           console.log('Token invalide');
+           return res.status(401).json({ message: 'Token invalide' });
+       }
+        console.log('ID dans getMyInfo ish ish:', id);
+
         const info = await userModel.getUserByID(pool, id);
         console.log('Info:', info);
         res.send(info);
     } catch (e) {
+        console.error('Erreur lors de la récupération des informations utilisateur:', e);
         res.sendStatus(500);
     }
 };
@@ -479,17 +491,101 @@ export const deleteUser = async (req, res) => {
  */
 export const getUserById = async (req, res) => {
     try {
-        const { id } = req.params; // Extraction de l'identifiant à partir des paramètres de la requête
-        const user = await userModel.getUserByID(pool, id); // Appel au modèle pour récupérer l'utilisateur
+        const { id } = req.params; 
+        const user = await userModel.getUserByID(pool, id);
         if (user) {
-            res.status(200).json(user); // Retourne les informations utilisateur
+            res.status(200).json(user);
         } else {
-            res.status(404).send('User not found'); // Gère le cas où l'utilisateur n'existe pas
+            res.status(404).send('User not found'); 
         }
     } catch (error) {
         console.error('Error fetching user by ID:', error);
-        res.sendStatus(500); // Gère les erreurs internes
+        res.sendStatus(500);
     }
 };
 
 
+export const registration = async (req, res) => {
+    try {
+        const emailExists = await userModel.userExistsMail(pool, { mailAddress: req.val.mailAddress });
+        const phoneExists = await userModel.userExistsTel(pool, { telNumber: req.val.telNumber });
+
+        if (phoneExists) {
+            return res.status(409).json({ message: 'Phone number already used' });
+        }
+        if (emailExists) {
+            return res.status(409).json({ message: 'Email already used' });
+        }
+
+        const user = await userModel.createUser(pool, req.val);
+        console.log('User created dans regi:', user);
+        const jwt = sign({ userID : user }, { expiresIn: '8h' });
+        return res.status(201).json({ message: 'User created successfully', token: jwt });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const registerUserWithService = async (req, res) => {
+    let SQLClient;  
+    console.log('body : ', req.body);
+    try {
+        // 1. Connexion à la base et début de la transaction
+        SQLClient = await pool.connect();
+        await SQLClient.query("BEGIN");
+        console.log('Transaction started');
+        
+        // 2. Création de l'utilisateur
+        const { lastName, firstName, telNumber, mailAddress, userPassword } = req.body.user;
+        const userID = await userModel.createUser(SQLClient, { lastName, firstName, telNumber, mailAddress, userPassword });
+        console.log('User created in controller:', userID);
+        
+        // 3. Génération du JWT pour l'utilisateur
+        const jwt = sign({ userID }, { expiresIn: '8h' });
+        
+        // 4. Création du service avec l'ID de l'utilisateur comme auteur
+        const { title, serviceDescription, serviceType, latitude, longitude } = req.body.service;
+        const { serviceID } = await createService({
+            pool: SQLClient,
+            title,
+            serviceDescription,
+            authorUser: userID, // L'ID utilisateur créé précédemment
+            serviceType,
+            latitude,
+            longitude,
+        });
+        console.log('Service created:', serviceID);
+        
+        // 5. Validation de la transaction
+        await SQLClient.query("COMMIT");
+
+        // 6. Réponse avec le JWT
+        res.status(201).json({
+            message: "Utilisateur et service créés avec succès",
+            userID,
+            serviceID,
+            token: jwt, // Ajout du token dans la réponse
+        });
+    } catch (err) {
+        console.error("Erreur lors de la transaction :", err);
+
+        try {
+            // Annulation de la transaction en cas d'erreur
+            if (SQLClient) {
+                console.log("Rollbacking...");
+                await SQLClient.query("ROLLBACK");
+            }
+        } catch (rollbackError) {
+            console.error("Erreur lors du rollback :", rollbackError);
+        } finally {
+            // Réponse en cas d'erreur
+            res.status(500).json({ message: "Une erreur est survenue lors de l'enregistrement." });
+        }
+    } finally {
+        // Libération du client SQL
+        if (SQLClient) {
+            SQLClient.release();
+        }
+    }
+};

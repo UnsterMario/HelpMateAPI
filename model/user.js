@@ -1,11 +1,5 @@
 import {hash} from '../util/index.js';
 
-
-
-// TODO: extraire localisation du téléphone dans creatUser ? 
-
-
-
 export const userExistsMail = async (SQLClient, { mailAddress }) => {
     const {rows} = await SQLClient.query(
         `SELECT * FROM AppUser WHERE mailaddress = $1`,
@@ -28,11 +22,6 @@ export const createUser = async (SQLClient, { lastName, firstName, telNumber, ma
     const isAdmin = false;
     const isRestricted = false;
 
-    // extraire localisation du téléphone ?????????????????????????
-    const localisation = 1;
-
-
-
     const {rows} = await SQLClient.query(
         'INSERT INTO AppUser(lastName, firstName, telNumber, mailAddress, userPassword,isAdmin,isRestricted) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING userID',
         [
@@ -45,7 +34,8 @@ export const createUser = async (SQLClient, { lastName, firstName, telNumber, ma
             isRestricted
         ]
     );
-    return rows[0];
+    console.log('User created in model:', rows[0]);
+    return rows[0].userid;
 };
 
 export const readUserByEmail = async (SQLClient, {mailAddress}) => {
@@ -55,6 +45,7 @@ export const readUserByEmail = async (SQLClient, {mailAddress}) => {
 };
 
 export const getUserByID = async (clientSQL, userID) => {
+    console.log('userID : ', userID);
     return (await clientSQL.query('SELECT userID, lastName, firstName, telNumber, mailAddress FROM AppUser WHERE userID = $1', [userID])).rows[0];
 };
 
@@ -108,6 +99,53 @@ export const updateMyInfo = async (SQLClient, userID, user) => {
     }
 };
 
+export const deleteMyAccount = async (SQLClient, userid) => {
+    try {
+        // Commencez une transaction
+        await SQLClient.query('BEGIN');
+
+        // Supprimez les messages associés aux conversations de l'utilisateur
+        await SQLClient.query(`
+            DELETE FROM Message
+            WHERE conversationID IN (
+                SELECT conversationID FROM Conversation WHERE user1 = $1 OR user2 = $1
+            )
+        `, [userid]);
+
+        // Supprimez les conversations de l'utilisateur
+        await SQLClient.query(`
+            DELETE FROM Conversation
+            WHERE user1 = $1 OR user2 = $1
+        `, [userid]);
+
+        // Supprimez les services de l'utilisateur
+        await SQLClient.query(`
+            DELETE FROM Service
+            WHERE authoruser = $1
+        `, [userid]);
+
+        // Supprimez les demandes de service de l'utilisateur
+        await SQLClient.query(`
+            DELETE FROM Service
+            WHERE provideruser = $1
+        `, [userid]);
+
+        // Supprimez l'utilisateur
+        await SQLClient.query(`
+            DELETE FROM AppUser
+            WHERE userid = $1
+        `, [userid]);
+
+        // Validez la transaction
+        await SQLClient.query('COMMIT');
+
+        return { message: 'Account and related data deleted successfully' };
+    } catch (error) {
+        // Effectuez un rollback en cas d'erreur
+        await SQLClient.query('ROLLBACK');
+        throw new Error(`Erreur lors de la suppression du compte : ${error.message}`);
+    }
+};
 
 
 // Requêtes pour les administrateurs

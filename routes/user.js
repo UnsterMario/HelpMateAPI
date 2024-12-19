@@ -7,17 +7,22 @@ import {
     checkAuth,
     getMyInfo,
     updateMe,
+    deleteMe,
+    registerUserWithService,
     //admin user
     registrationAdmin,
     adminLogin,
     getAllUsers,
     updateUser,
-    getUserById
+    deleteUser,
+    getUserById,
 } from '../controler/user.js';
 
 import {checkJWT} from '../middleware/identification/jwt.js';
 import {userValidatorMiddleware as UVM} from '../middleware/validation.js';
 import {checkAdmin} from '../middleware/identification/admin.js';
+
+
 
 const router = Router();
 

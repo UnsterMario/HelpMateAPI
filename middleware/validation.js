@@ -69,6 +69,14 @@ export const userValidatorMiddleware = {
         } catch (e) {
             res.status(400).send(e.messages);
         }
+    },
+    userWithService: async (req, res, next) => {
+        try {
+            req.val = await userValidator.userWithService.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
     }
 };
 
@@ -110,9 +118,11 @@ export const productValidatorMiddlewares = {
 export const serviceValidatorMiddleware = {
     create: async (req, res, next) => {
         try {
+            console.log('serviceValidatorMiddleware.create', req.body);
             req.val = await serviceValidator.create.validate(req.body);
             next();
         } catch (e) {
+            console.log('serviceValidatorMiddleware.create.error', e);
             res.status(400).send(e.messages);
         }
     },

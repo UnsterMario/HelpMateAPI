@@ -33,8 +33,27 @@ const adminSchema = vine.object({
     isRestricted: vine.boolean(),
 });
 
+const userWithServiceSchema = vine.object({
+    user: vine.object({
+        lastName: vine.string().trim(),
+        firstName: vine.string().trim(),
+        telNumber: vine.string().trim(),
+        mailAddress: vine.string().email().trim(),
+        userPassword: vine.string()
+    }),
+    service: vine.object({
+        title: vine.string().trim(),
+        latitude: vine.number(),
+        longitude: vine.number(),
+        serviceDescription: vine.string().trim(),
+        serviceType: vine.number(),
+        providerUser: vine.string().optional(),
+    }),
+});
+
 export const
     user = vine.compile(userSchema),
     login = vine.compile(loginSchema),
     update = vine.compile(updateSchema),
-    admin = vine.compile(adminSchema);
+    admin = vine.compile(adminSchema),
+    userWithService = vine.compile(userWithServiceSchema);
