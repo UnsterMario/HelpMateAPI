@@ -1,7 +1,12 @@
-// messageController.js (Contrôleur)
 
-import { createMessage, getMessagesByConversation, deleteMessage, getLastMessageByConversation } from '../model/message.js';
-import { getConversationID } from '../model/conversation.js'; 
+import { 
+    createMessage, 
+    getMessagesByConversation, 
+    deleteMessage, 
+    getLastMessageByConversation, 
+    updateMessage 
+} from '../model/message.js';
+
 
 import { pool } from '../database/database.js';  
 
@@ -52,7 +57,7 @@ export const getMessagesHandler = async (req, res) => {
 
 
 export const deleteMessageHandler = async (req, res) => {
-    const { messageID } = req.params;
+    const messageID = req.params.id;
     try {
         const success = await deleteMessage({ messageID, pool });
         if (!success) {
@@ -84,3 +89,26 @@ export const getLastMessageHandler = async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur interne' });
     }
 };
+
+export const updateMessageHandler = async (req, res) => {
+    const id = req.params.id;
+    const { content } = req.body;
+    console.log("id", id);
+    console.log("content", content);
+    try {
+        if (!content || content.trim() === '') {
+            return res.status(400).json({ error: 'Le contenu du message ne peut pas être vide' });
+        }
+
+        const result = await updateMessage({ messageID: id, content, pool });
+
+        if (!result) {
+            return res.status(404).json({ error: 'Message introuvable' });
+        }
+
+        res.status(200).json({ message: 'Message mis à jour avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du message:', error);
+        res.status(500).json({ error: 'Erreur serveur interne' });
+    }
+}

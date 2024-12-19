@@ -8,6 +8,7 @@ import Router from 'express-promise-router';
 import {
     login,
     registration,
+    deleteUser,
     //normal user
     checkAuth,
     getMyInfo,
@@ -15,6 +16,7 @@ import {
     deleteMe,
     registerUserWithService,
     //admin user
+    registrationAdmin,
     adminLogin,
     getAllUsers,
     updateUser,
@@ -37,15 +39,15 @@ router.post('/registration', UVM.user, registration);
 router.get('/me', checkJWT, getMyInfo);
 router.get('/:id', getUserById);
 router.patch('/me', checkJWT, UVM.update, updateMe);
-router.delete('/me', checkJWT, deleteMe);
+router.delete('/me', checkJWT, deleteUser);
 router.post('/auth',checkJWT, checkAuth);
 router.post('/registration-with-service', UVM.userWithService, registerUserWithService);
 
 // Routes pour les administrateurs
 router.post('/admin/login', UVM.login,adminLogin);
-router.post('/admin/users', checkJWT, checkAdmin, UVM.admin, registration);
+router.post('/admin/users', checkJWT, checkAdmin, UVM.admin, registrationAdmin);
 router.get('/admin/users', checkJWT, checkAdmin, getAllUsers);
-router.patch('/admin/users/:id/role', checkJWT, checkAdmin, UVM.update, updateUser);
+router.patch('/admin/users/:id', checkJWT, checkAdmin, UVM.update, updateUser);
 router.delete('/admin/users/:id', checkJWT, checkAdmin, deleteUser);
 
 export default router;

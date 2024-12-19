@@ -1,4 +1,4 @@
-import { createConversation, getConversationsByUser, getConversationID, conversationExists } from '../model/conversation.js';
+import { createConversation, getConversationsByUser, getConversationID, conversationExists, getAllConversations } from '../model/conversation.js';
 import { pool } from '../database/database.js';
 
 export const createConversationHandler = async (req, res) => {
@@ -16,7 +16,7 @@ export const createConversationHandler = async (req, res) => {
 };
 
 export const getConversationsHandler = async (req, res) => {
-    const userID = parseInt(req.params.userID, 10);
+    const userID = parseInt(req.params.userID);
     try {
         const conversations = await getConversationsByUser({ pool, userID });
         res.status(200).json(conversations);
@@ -25,6 +25,16 @@ export const getConversationsHandler = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+export const getAllConversationsHandler = async (req, res) => {
+    try {
+        const conversations = await getAllConversations({ pool });
+        res.status(200).json(conversations);
+    } catch (error) {
+        console.error('Error fetching conversations:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
 
 export const getConversationIDHandler = async (req, res) => {
     const { user1, user2 } = req.params; // Get users from request parameters

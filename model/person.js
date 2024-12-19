@@ -16,7 +16,9 @@ export const readAdmin = async (clientSQL, {mailAddress, userPassword }) => {
     if (client && await compare(userPassword, client.userpassword)) {
         return {
             userID: client.userid, // ABSOLUMENT PAS client.userID !!!
-            isAdmin: client.isadmin // ABSOLUMENT PAS client.isAdmin !!! postgres met automatiquement en minuscule les noms de colonnes
+            isAdmin: client.isadmin, // ABSOLUMENT PAS client.isAdmin !!! postgres met automatiquement en minuscule les noms de colonnes
+            firstName: client.firstname,
+            lastName: client.lastname
         };
     }
     return null;

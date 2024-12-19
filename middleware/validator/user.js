@@ -18,7 +18,9 @@ const updateSchema = vine.object({
     firstName: vine.string().trim().optional(),
     telNumber: vine.string().trim().optional(),
     mailAddress: vine.string().trim().optional(),
-    userPassword: vine.string().optional()
+    userPassword: vine.string().optional(),
+    isAdmin: vine.boolean().optional(),
+    isRestricted: vine.boolean().optional()
 });
 
 const adminSchema = vine.object({
@@ -26,7 +28,7 @@ const adminSchema = vine.object({
     firstName: vine.string().trim(),
     telNumber: vine.string().trim(),
     mailAddress: vine.string().email().trim(),
-    userPassword: vine.string(),
+    userPassword: vine.string().trim(),
     isAdmin: vine.boolean(),
     isRestricted: vine.boolean(),
 });

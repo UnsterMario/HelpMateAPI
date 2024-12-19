@@ -150,6 +150,22 @@ export const deleteMyAccount = async (SQLClient, userid) => {
 
 // Requêtes pour les administrateurs
 
+export const createUserAdmin = async (SQLClient, {lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted}) => {
+    const {rows} = await SQLClient.query(
+        'INSERT INTO AppUser(lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING userID, lastName, firstName, telNumber, mailAddress,isAdmin, isRestricted',
+        [
+            lastName,
+            firstName,
+            telNumber,
+            mailAddress,
+            await hash(userPassword),
+            isAdmin,
+            isRestricted
+        ]
+    );
+
+    return rows[0];
+};
 
 export const readAdminByEmail = async (SQLClient, {mailAddress}) => {
     // verifier si l'utilisateur est un admin
@@ -198,7 +214,9 @@ export const updateUser = async (SQLClient, userID, {lastName, firstName, telNum
     if(queryValues.length > 0){
         queryValues.push(userID);
         query += `${querySet.join(', ')} WHERE userID = $${queryValues.length}`;
-        return await SQLClient.query(query, queryValues);
+        await SQLClient.query(query, queryValues);
+        const { rows } = await SQLClient.query('SELECT userID, lastName, firstName, telNumber, mailAddress, isAdmin, isRestricted FROM AppUser WHERE userID = $1', [userID]);
+        return rows[0];
     } else {
         throw new Error('No field given');
     }
