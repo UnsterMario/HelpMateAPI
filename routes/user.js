@@ -13,18 +13,20 @@ import {
     getMyInfo,
     updateMe,
     deleteMe,
+    registerUserWithService,
     //admin user
     adminLogin,
     getAllUsers,
     updateUser,
     deleteUser,
-    getUserById
+    getUserById,
 } from '../controler/user.js';
 
 
 import {checkJWT} from '../middleware/identification/jwt.js';
 import {userValidatorMiddleware as UVM} from '../middleware/validation.js';
 import {checkAdmin} from '../middleware/identification/admin.js';
+
 
 
 const router = Router();
@@ -37,6 +39,7 @@ router.get('/:id', getUserById);
 router.patch('/me', checkJWT, UVM.update, updateMe);
 router.delete('/me', checkJWT, deleteMe);
 router.post('/auth',checkJWT, checkAuth);
+router.post('/registration-with-service', UVM.userWithService, registerUserWithService);
 
 // Routes pour les administrateurs
 router.post('/admin/login', UVM.login,adminLogin);
