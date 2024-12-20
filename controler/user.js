@@ -120,16 +120,16 @@ export const login = async (req, res) => {
  */
 export const registration = async (req, res) => {
     try {
-        const emailExists = await userModel.userExistsMail(pool, {mailAddress:req.val.mailAddress});
-        const phoneExists = await userModel.userExistsTel(pool, {telNumber:req.val.telNumber});
+        const emailExists = await userModel.userExistsMail(pool, { mailAddress: req.val.mailAddress });
+        const phoneExists = await userModel.userExistsTel(pool, { telNumber: req.val.telNumber });
 
         if (phoneExists) {
             return res.status(409).json({ message: 'Phone number already used' });
-
         }
         if (emailExists) {
             return res.status(409).json({ message: 'Email already used' });
         }
+
         const user = await userModel.createUser(pool, req.val);
         const jwt = sign({userID: user}, {
             expiresIn: '8h'
@@ -140,6 +140,7 @@ export const registration = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 /**
  * @swagger
