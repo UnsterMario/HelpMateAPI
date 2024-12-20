@@ -1,10 +1,9 @@
-exports.validateMessage = (req, res, next) => {
-    const { user1, user2, content } = req.body;
-    if (!content || typeof content !== 'string' || content.trim() === '') {
-        return res.status(400).json({ error: 'Content cannot be empty' });
-    }
-    if (!user1 || !user2 || typeof user1 !== 'number' || typeof user2 !== 'number') {
-        return res.status(400).json({ error: 'Invalid user IDs' });
-    }
-    next();
-};
+import vine from '@vinejs/vine';
+
+const messageSchema = vine.object({
+    content: vine.string().trim()
+});
+
+export const 
+    create = vine.compile(messageSchema),
+    update = vine.compile(messageSchema);

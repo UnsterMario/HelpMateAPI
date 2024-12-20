@@ -122,6 +122,7 @@ export const getAllServicesHandler = async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+//c'est utilisé ca ?
 export const getServiceByIDHandler = async (req, res) => {
     try {
         const { id: serviceID } = req.params;
@@ -221,7 +222,7 @@ export const deleteServiceHandler = async (req, res) => {
         }
 
         await deleteService(serviceID, pool);
-        res.status(204).send();
+        res.sendStatus(204);
     } catch (error) {
         console.error('Error deleting Service:', error);
         res.status(500).json({ error: 'Internal server error' });
