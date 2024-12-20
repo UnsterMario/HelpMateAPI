@@ -36,7 +36,7 @@ CREATE TABLE AppUser  (
 -- Ajout d'utilisateurs dans AppUser
 INSERT INTO AppUser (lastName, firstName, telNumber, mailAddress, userPassword, isAdmin)
 VALUES
-('System','System','0000000000','system@mail.com','$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true),
+('System','System','0000000000','system@mail.com','$argon2id$v=19$m=65536,t=3,p=4$fO8VCOKXuZJptcezCXkC0w$fp+Fp10bTqJ77e745kPqa+0Fol4eX1WW3G9kCz8YTq8', true),
 ('Doe', 'John', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true), -- admin
 ('Smith', 'Alice', '0490123456', 'alice@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false),
 ('Brown', 'Charlie', '0489001122', 'charlie@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false),
