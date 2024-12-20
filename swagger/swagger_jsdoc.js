@@ -5,9 +5,25 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'API', // Title (required)
-            version: '1.0.0', // Version (required)
+            title: 'API HelpMate', // Title (required)
+            version: '1.1.2', // Version (required)
         },
+        servers: [
+            {
+                url: 'http://localhost:3001',
+                description: 'Local server',
+            },
+        ],
+        tags: [
+            {
+                name: 'User',
+                description: 'User management, himself and admin',
+            },
+            {
+                name: 'Service',
+                description: 'Service management',
+            }
+        ],
     },
     // Path to the API docs
     apis: [

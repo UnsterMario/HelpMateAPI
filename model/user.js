@@ -20,21 +20,18 @@ export const createUser = async (SQLClient, { lastName, firstName, telNumber, ma
 
     // assigner les valeurs par défaut
     const isAdmin = false;
-    const isRestricted = false;
 
     const {rows} = await SQLClient.query(
-        'INSERT INTO AppUser(lastName, firstName, telNumber, mailAddress, userPassword,isAdmin,isRestricted) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING userID',
+        'INSERT INTO AppUser(lastName, firstName, telNumber, mailAddress, userPassword,isAdmin) VALUES ($1, $2, $3, $4, $5,$6) RETURNING userID',
         [
             lastName,
             firstName,
             telNumber,
             mailAddress,
             await hash(userPassword),
-            isAdmin,
-            isRestricted
+            isAdmin
         ]
     );
-    console.log('User created in model:', rows[0]);
     return rows[0].userid;
 };
 
@@ -45,7 +42,6 @@ export const readUserByEmail = async (SQLClient, {mailAddress}) => {
 };
 
 export const getUserByID = async (clientSQL, userID) => {
-    console.log('userID : ', userID);
     return (await clientSQL.query('SELECT userID, lastName, firstName, telNumber, mailAddress FROM AppUser WHERE userID = $1', [userID])).rows[0];
 };
 
@@ -55,11 +51,11 @@ export const updateMyInfo = async (SQLClient, userID, user) => {
     firstName = user.firstName || null;
     telNumber = user.telNumber || null;
     mailAddress = user.mailAddress || null;
-    console.log(lastName, firstName, telNumber, mailAddress);
 
     let query = 'UPDATE AppUser SET ';
     const querySet = [];
     const queryValues = [];
+
     if(lastName){
         queryValues.push(lastName);
         querySet.push(`lastName = $${queryValues.length}`);
@@ -69,7 +65,6 @@ export const updateMyInfo = async (SQLClient, userID, user) => {
         querySet.push(`firstName = $${queryValues.length}`);
     }
     if(telNumber){
-        console.log('ici');
         queryValues.push(telNumber);
         querySet.push(`telNumber = $${queryValues.length}`);
 
@@ -87,11 +82,12 @@ export const updateMyInfo = async (SQLClient, userID, user) => {
                 message: 'User updated successfully',
             });
         } catch (error) {
-            // Vérifie si l'erreur est liée à une contrainte unique
+            // Vérifie si l'erreur est liée à une contrainte unique grace à son code
             if (error.code === '23505') {
-                return error // PostgreSQL code pour violation de contrainte unique
+                return error;
             }
             // Autres erreurs SQL
+            
             throw new Error(`Erreur SQL : ${error.message}`);
         }
     } else {
@@ -143,24 +139,23 @@ export const deleteMyAccount = async (SQLClient, userid) => {
     } catch (error) {
         // Effectuez un rollback en cas d'erreur
         await SQLClient.query('ROLLBACK');
-        throw new Error(`Erreur lors de la suppression du compte : ${error.message}`);
+        throw new Error(`Account not deleted : ${error.message}`);
     }
 };
 
 
 // Requêtes pour les administrateurs
 
-export const createUserAdmin = async (SQLClient, {lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted}) => {
+export const createUserAdmin = async (SQLClient, {lastName, firstName, telNumber, mailAddress, userPassword, isAdmin}) => {
     const {rows} = await SQLClient.query(
-        'INSERT INTO AppUser(lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING userID, lastName, firstName, telNumber, mailAddress,isAdmin, isRestricted',
+        'INSERT INTO AppUser(lastName, firstName, telNumber, mailAddress, userPassword, isAdmin) VALUES ($1, $2, $3, $4, $5, $6) RETURNING userID, lastName, firstName, telNumber, mailAddress,isAdmin',
         [
             lastName,
             firstName,
             telNumber,
             mailAddress,
             await hash(userPassword),
-            isAdmin,
-            isRestricted
+            isAdmin
         ]
     );
 
@@ -178,15 +173,16 @@ export const readAdminByEmail = async (SQLClient, {mailAddress}) => {
 export const getUsers = async (SQLClient) => {
     return (
         await SQLClient.query(
-            'SELECT userID, lastName, firstName, telNumber, mailAddress,isAdmin, isRestricted FROM AppUser'
+            'SELECT userID, lastName, firstName, telNumber, mailAddress,isAdmin FROM AppUser'
         )
     ).rows;
 };
 
-export const updateUser = async (SQLClient, userID, {lastName, firstName, telNumber, mailAddress, isAdmin, isRestricted}) => {
+export const updateUser = async (SQLClient, userID, {lastName, firstName, telNumber, mailAddress, isAdmin}) => {
     let query = 'UPDATE AppUser SET ';
     const querySet = [];
     const queryValues = [];
+    
     if(lastName){
         queryValues.push(lastName);
         querySet.push(`lastName = $${queryValues.length}`);
@@ -207,15 +203,11 @@ export const updateUser = async (SQLClient, userID, {lastName, firstName, telNum
         queryValues.push(isAdmin);
         querySet.push(`isAdmin = $${queryValues.length}`);
     }
-    if(isRestricted){
-        queryValues.push(isRestricted);
-        querySet.push(`isRestricted = $${queryValues.length}`);
-    }
     if(queryValues.length > 0){
         queryValues.push(userID);
         query += `${querySet.join(', ')} WHERE userID = $${queryValues.length}`;
         await SQLClient.query(query, queryValues);
-        const { rows } = await SQLClient.query('SELECT userID, lastName, firstName, telNumber, mailAddress, isAdmin, isRestricted FROM AppUser WHERE userID = $1', [userID]);
+        const { rows } = await SQLClient.query('SELECT userID, lastName, firstName, telNumber, mailAddress, isAdmin FROM AppUser WHERE userID = $1', [userID]);
         return rows[0];
     } else {
         throw new Error('No field given');

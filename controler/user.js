@@ -4,30 +4,7 @@ import {createService} from '../model/service.js';
 import {sign, verify} from '../util/jwt.js';
 import {readPerson, readAdmin} from '../model/person.js';
 
-/**
- * @swagger
- * components:
- *  schemas:
- *      user:
- *          type: object
- *          properties:
- *              userID:
- *                  type: integer
- *              firstName:
- *                  type: string
- *              lastName:
- *                  type: string
- *              telNumber:
- *                  type: string
- *              mailAddress:
- *                  type: string
- *              userPassword:
- *                  type: string
- *              isAdmin:
- *                  type: boolean
- *              isRestricted:
- *                  type: boolean
- */
+
 /**
  * @swagger
  * /auth:
@@ -48,35 +25,34 @@ export const checkAuth = async (req, res) => {
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ message: 'Token manquant ou invalide' });
+            return res.status(401).json({ message: 'No bearer token' });
         }
 
         const token = authHeader.split(' ')[1];
 
         // Vérifier le JWT
         const decoded = verify(token);
-        console.log('Decoded:', decoded);
 
         if (!decoded) {
-            return res.status(401).json({ message: 'Token invalide' });
+            return res.status(401).json({ message: 'Invalid token' });
         }
 
         // Rechercher l'utilisateur dans la base de données
         const user = await userModel.getUserByID(pool, decoded);
 
         if (!user) {
-            return res.status(401).json({ message: 'Utilisateur non trouvé' });
+            return res.status(401).json({ message: "Doesn't found an user" });
         }
 
         // Retourner l'utilisateur si tout est valide
-        return res.status(200).json({ message: 'Authentification réussie', user: user.lastname });
+        return res.status(200).json({ message: 'Successfull auth', user: user.lastname });
     } catch (err) {
         // Gérer les erreurs liées au JWT (ex: expiré, signature invalide)
         console.error(err);
         if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ message: 'Token expiré' });
+            return res.status(401).json({ message: 'Expired token' });
         }
-        return res.status(500).json({ message: 'Erreur interne au serveur' });
+        return res.status(500).json({ message: 'Internal server error auth check' });
     }
 };
 
@@ -91,12 +67,7 @@ export const checkAuth = async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               mailAddress:
- *                 type: string
- *               userPassword:
- *                 type: string
+ *             $ref: '#/components/schemas/LoginSchema'
  *     responses:
  *       201:
  *         description: User logged in successfully
@@ -109,7 +80,6 @@ export const login = async (req, res) => {
     try {
         const rep = await readPerson(pool, {mailAddress: req.val.mailAddress, userPassword: req.val.userPassword});
         if(rep) {
-            console.log('User logged in:', rep);
             const jwt = sign(rep, {
                 expiresIn: '8h'
             });
@@ -135,14 +105,7 @@ export const login = async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               mailAddress:
- *                 type: string
- *               userPassword:
- *                 type: string
- *               telNumber:
- *                 type: string
+ *             $ref: '#/components/schemas/UserSchema'
  *     responses:
  *       201:
  *         description: User created successfully
@@ -185,6 +148,10 @@ export const registration = async (req, res) => {
  *     responses:
  *       200:
  *         description: User info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UpdateSchema'
  *       500:
  *         description: Internal server error
  */
@@ -224,12 +191,7 @@ export const getMyInfo = async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               mailAddress:
- *                 type: string
- *               telNumber:
- *                 type: string
+ *             $ref: '#/components/schemas/UpdateSchema'
  *     responses:
  *       200:
  *         description: User updated
@@ -284,18 +246,14 @@ export const deleteMe = async (req, res) => {
  * /admin/login:
  *   post:
  *     summary: Admin login
- *     tags: [Admin]
+ *     tags: [User]
+ *     description: Admin only
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               mailAddress:
- *                 type: string
- *               userPassword:
- *                 type: string
+ *             $ref: '#/components/schemas/LoginSchema'
  *     responses:
  *       201:
  *         description: Admin logged in successfully
@@ -311,7 +269,6 @@ export const adminLogin = async (req, res) => {
             const jwt = sign({ userID: user.userID, isAdmin: user.isAdmin },{
                 expiresIn: '24h'
             });
-            console.log('Generated JWT:', jwt);
             res.status(201).json({
                 token: jwt,
                 user: {
@@ -323,8 +280,7 @@ export const adminLogin = async (req, res) => {
             res.sendStatus(403); 
         }
     } catch (err) {
-        console.error('Error during admin login:', err);
-        res.sendStatus(500);
+        res.status(500).json({ message: 'Internal server error admin login' });
     }
 };
 
@@ -333,7 +289,8 @@ export const adminLogin = async (req, res) => {
  * /admin/users:
  *   post:
  *     summary: Register a new admin user
- *     tags: [Admin]
+ *     tags: [User]
+ *     description: Admin only
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -341,14 +298,7 @@ export const adminLogin = async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               mailAddress:
- *                 type: string
- *               userPassword:
- *                 type: string
- *               name:
- *                 type: string
+ *             $ref: '#/components/schemas/UserSchema'
  *     responses:
  *       201:
  *         description: Admin user created
@@ -379,12 +329,19 @@ export const registrationAdmin = async (req, res) => {
  * /admin/users:
  *   get:
  *     summary: Get all users
- *     tags: [Admin]
+ *     tags: [User]
+ *     description: Admin only
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AdminPanelSchema'
  *       500:
  *         description: Internal server error
  */
@@ -402,14 +359,15 @@ export const getAllUsers = async (req, res) => {
  * /admin/users/{id}:
  *   patch:
  *     summary: Update user by ID
- *     tags: [Admin]
+ *     tags: [User]
+ *     description: Admin only
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: User ID
  *     requestBody:
@@ -417,12 +375,7 @@ export const getAllUsers = async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               mailAddress:
- *                 type: string
- *               name:
- *                 type: string
+ *             $ref: '#/components/schemas/AdminPanelSchema'
  *     responses:
  *       204:
  *         description: User updated
@@ -443,14 +396,15 @@ export const updateUser = async (req, res) => {
  * /admin/users/{id}:
  *   delete:
  *     summary: Delete user by ID
- *     tags: [Admin]
+ *     tags: [User]
+ *     description: Admin only
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: User ID
  *     responses:
@@ -461,10 +415,11 @@ export const updateUser = async (req, res) => {
  */
 export const deleteUser = async (req, res) => {
     try {
-        await userModel.deleteUser(pool, req.params.id);
+        //on reprend le delete pour l'user mais l'admin insert l'id
+        await userModel.deleteMyAccount(pool, req.params.id);
         res.sendStatus(204);
     } catch (e) {
-        res.sendStatus(500);
+        res.status(500).json({ message: 'Internal server error delete user admin' });
     }
 };
 
@@ -478,12 +433,16 @@ export const deleteUser = async (req, res) => {
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: User ID
  *     responses:
  *       200:
  *         description: User info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UpdateSchema'
  *       404:
  *         description: User not found
  *       500:
@@ -499,26 +458,39 @@ export const getUserById = async (req, res) => {
             res.status(404).send('User not found'); 
         }
     } catch (error) {
-        console.error('Error fetching user by ID:', error);
-        res.sendStatus(500);
+        res.status(500).json({ message: 'Internal server error user by id admin' });
     }
 };
 
-
-
+/**
+ * @swagger
+ * /registration-with-service:
+ *   post:
+ *     summary: Register user with service
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserWithServiceSchema'
+ *     responses:
+ *       201:
+ *         description: User and service created successfully
+ *       500:
+ *         description: Internal server error
+ */
 export const registerUserWithService = async (req, res) => {
     let SQLClient;  
-    console.log('body : ', req.body);
     try {
         // 1. Connexion à la base et début de la transaction
         SQLClient = await pool.connect();
         await SQLClient.query("BEGIN");
-        console.log('Transaction started');
         
         // 2. Création de l'utilisateur
         const { lastName, firstName, telNumber, mailAddress, userPassword } = req.body.user;
-        const userID = await userModel.createUser(SQLClient, { lastName, firstName, telNumber, mailAddress, userPassword });
-        console.log('User created in controller:', userID);
+        const userID = await userModel.createUser(SQLClient, 
+            { lastName, firstName, telNumber, mailAddress, userPassword });
         
         // 3. Génération du JWT pour l'utilisateur
         const jwt = sign({ userID }, { expiresIn: '8h' });
@@ -534,32 +506,28 @@ export const registerUserWithService = async (req, res) => {
             latitude,
             longitude,
         });
-        console.log('Service created:', serviceID);
         
         // 5. Validation de la transaction
         await SQLClient.query("COMMIT");
 
         // 6. Réponse avec le JWT
         res.status(201).json({
-            message: "Utilisateur et service créés avec succès",
+            message: "User and service created successfully",
             userID,
             serviceID,
             token: jwt, // Ajout du token dans la réponse
         });
     } catch (err) {
-        console.error("Erreur lors de la transaction :", err);
-
         try {
             // Annulation de la transaction en cas d'erreur
             if (SQLClient) {
-                console.log("Rollbacking...");
                 await SQLClient.query("ROLLBACK");
             }
         } catch (rollbackError) {
-            console.error("Erreur lors du rollback :", rollbackError);
+            res.status(500).json({ message: "Rollback error", error: rollbackError });
         } finally {
             // Réponse en cas d'erreur
-            res.status(500).json({ message: "Une erreur est survenue lors de l'enregistrement." });
+            res.status(500).json({ message: "Error during the registration" });
         }
     } finally {
         // Libération du client SQL

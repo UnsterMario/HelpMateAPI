@@ -1,16 +1,23 @@
-DROP TABLE IF EXISTS client CASCADE;
-DROP TABLE IF EXISTS manager CASCADE;
-DROP TABLE IF EXISTS product CASCADE;
-DROP TABLE IF EXISTS purchase CASCADE;
+
+DROP TABLE IF EXISTS About_us CASCADE;
+
+CREATE TABLE About_us (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,                -- Identifiant unique
+    content TEXT NOT NULL,                -- Texte pour la section "À propos de nous"
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Date de dernière modification
+);
+
+INSERT INTO About_us (content) VALUES (
+    'HelpMate est une application développée par l''équipe JeF pour rapprocher les voisins et faciliter l''entraide au quotidien.
 
 
+    Que ce soit pour un petit service, un coup de main ou une tâche plus spécifique, HelpMate. permet de mettre en relation les personnes à proximité qui cherchent à s''entraider.
 
-DROP TABLE IF EXISTS Localisation CASCADE;
 
-CREATE TABLE Localisation (
-                              localisationID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                              latitude DECIMAL(9,6) NOT NULL,
-                              longitude DECIMAL(9,6) NOT NULL
+    Avec une interface simple et intuitive, vous pouvez poster ou accepter des demandes et contribuer à une communauté plus solidaire.
+
+
+    Rejoignez-nous dans cette aventure et devenez un acteur de l''entraide locale !'
 );
 
 DROP TABLE IF EXISTS AppUser CASCADE;
@@ -23,21 +30,17 @@ CREATE TABLE AppUser  (
                           telNumber VARCHAR(20) CHECK (LENGTH(telNumber) > 0) UNIQUE,
                           mailAddress VARCHAR(255) CHECK (LENGTH(mailAddress) > 0) UNIQUE,
                           userPassword VARCHAR NOT NULL CHECK (LENGTH(userPassword) > 0),
-    -- Paypal ??????
-                          isAdmin BOOLEAN NOT NULL,
-                          isRestricted BOOLEAN NOT NULL,
-                          localisation INT,
-                          CONSTRAINT FK_AppUser_localisation FOREIGN KEY (localisation) REFERENCES Localisation(localisationID)
+                          isAdmin BOOLEAN NOT NULL
 );
 
 -- Ajout d'utilisateurs dans AppUser
-INSERT INTO AppUser (lastName, firstName, telNumber, mailAddress, userPassword, isAdmin, isRestricted)
+INSERT INTO AppUser (lastName, firstName, telNumber, mailAddress, userPassword, isAdmin)
 VALUES
-('System','System','0000000000','system@mail.com','$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false),
-('Doe', 'John', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true, false), -- admin
-('Smith', 'Alice', '0490123456', 'alice@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false),
-('Brown', 'Charlie', '0489001122', 'charlie@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false),
-('Johnson', 'Diana', '0489556677', 'diana@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false, false); -- restricted
+('System','System','0000000000','system@mail.com','$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true),
+('Doe', 'John', '0489675636', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', true), -- admin
+('Smith', 'Alice', '0490123456', 'alice@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false),
+('Brown', 'Charlie', '0489001122', 'charlie@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false),
+('Johnson', 'Diana', '0489556677', 'diana@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$IfLthWBk4ra2iihE1qovow$+WNyZPw101Ah4MHLR0hYoX/ervjLCEMHLhGaQL53HUQ', false);
 
 
 DROP TABLE IF EXISTS TypeService CASCADE;
@@ -81,17 +84,17 @@ CREATE TABLE Service (
 -- Exemple 1: Service de Jardinage par Alice
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 2, 1, 1, 50.4631551, 4.8619083);
+('Coupe d arbre', 'Besoin de couper un arbre de 3m dans le fond de mon jardin', 2, 3, 1, 50.4631551, 4.8619083);
 
 -- Exemple 2: Service d\'Animaux par Bob
 INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
 VALUES
-('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 3, 1, 2, 50.4639551, 4.8659083);
+('Garde d un chat', 'Besoin de nourrir mon chat 2x/j pendant 1 semaine', 3, 2, 2, 50.4639551, 4.8659083);
 
 -- Exemple 3: Service de Garde d\'Enfants par Charlie
-INSERT INTO Service (title, serviceDescription, authorUser, providerUser, serviceType, latitude, longitude)
+INSERT INTO Service (title, serviceDescription, authorUser, serviceType, latitude, longitude)
 VALUES
-('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 4, 1, 3, 50.4675551, 4.8699083);
+('Garde de mon fils', 'Besoin de garder mon fils de 3 ans les mercredis après-midi', 4, 3, 50.4675551, 4.8699083);
 
 DROP TABLE IF EXISTS Conversation CASCADE;
 

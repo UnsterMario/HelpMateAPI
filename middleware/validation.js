@@ -1,7 +1,4 @@
 import * as userValidator from './validator/user.js';
-import * as productValidator from './validator/product.js';
-import * as purchaseValidator from './validator/purchase.js';
-import * as managerValidator from './validator/manager.js';
 import * as typeServiceValidator from './validator/typeservice.js';
 import * as serviceValidator from './validator/service.js';
 import * as aboutUsValidator from './validator/aboutus.js';
@@ -35,7 +32,7 @@ export const aboutUsValidatorMiddleware = {
             res.status(400).send(e.messages);
         }
     },
-};
+};      
 
 export const userValidatorMiddleware = {
     login: async (req, res, next) => {
@@ -73,41 +70,6 @@ export const userValidatorMiddleware = {
     userWithService: async (req, res, next) => {
         try {
             req.val = await userValidator.userWithService.validate(req.body);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    }
-};
-
-export const productValidatorMiddlewares = {
-    searchedProduct : async (req, res, next) => {
-        try {
-            req.val  = await productValidator.searchedProduct.validate(req.params);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    },
-    productToAdd: async(req, res, next) => {
-        try {
-            req.val  = await productValidator.productToAdd.validate(req.body);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    },
-    productToUpdate: async(req, res, next) => {
-        try {
-            req.val  = await productValidator.productToUpdate.validate(req.body);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    },
-    productToDelete: async(req, res, next) => {
-        try {
-            req.val  = await productValidator.productToDelete.validate(req.params);
             next();
         } catch (e) {
             res.status(400).send(e.messages);
@@ -161,6 +123,7 @@ export const serviceValidatorMiddleware = {
 };
 
 
+
 export const typeServiceValidatorMiddleware = {
     create: async (req, res, next) => {
         try {
@@ -196,32 +159,3 @@ export const typeServiceValidatorMiddleware = {
     }
 };
 
-export const purchaseValidatorMiddlewares = {
-    purchaseToAdd : async (req, res, next) => {
-        try {
-            req.val = await purchaseValidator.purchaseToAdd.validate(req.body);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    },
-    purchaseWithRegistration : async (req, res, next) => {
-        try {
-            req.val = await purchaseValidator.purchaseWithRegistration.validate(req.body);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    }
-};
-
-export const managerValidatorMiddleware = {
-    updateClient: async (req, res, next) => {
-        try {
-            req.val = await managerValidator.client.validate(req.body);
-            next();
-        } catch (e) {
-            res.status(400).send(e.messages);
-        }
-    }
-};

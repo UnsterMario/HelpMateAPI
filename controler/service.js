@@ -8,7 +8,30 @@ import {
 } from '../model/service.js';
 import {pool} from '../database/database.js';
 
-
+/**
+ * @swagger
+ * /services:
+ *   post:
+ *     summary: Create a new service
+ *     tags: [Service]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ServiceCreateSchema'
+ *     responses:
+ *       201:
+ *         description: Service created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ServiceCreateSchema'
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
 export const createServiceHandler = async (req, res) => {
     console.log('createServiceHandler : ', req.body);
     try {
@@ -44,6 +67,24 @@ export const createServiceHandler = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /services:
+ *   get:
+ *     summary: Get all services
+ *     tags: [Service]
+ *     responses:
+ *       200:
+ *         description: List of services
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ServiceCreateSchema'
+ *       500:
+ *         description: Internal server error
+ */
 export const getAllServicesHandler = async (req, res) => {
     try {
         const services = await getAllServices(pool);
@@ -54,6 +95,33 @@ export const getAllServicesHandler = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /services/{id}:
+ *   get:
+ *     summary: Get service by ID
+ *     tags: [Service]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Service ID
+ *     responses:
+ *       200:
+ *         description: Service info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ServiceCreateSchema'
+ *       400:
+ *         description: Service ID is required
+ *       404:
+ *         description: Service not found
+ *       500:
+ *         description: Internal server error
+ */
 export const getServiceByIDHandler = async (req, res) => {
     try {
         const { id: serviceID } = req.params;
@@ -75,6 +143,33 @@ export const getServiceByIDHandler = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /services/{id}:
+ *   patch:
+ *     summary: Update service by ID
+ *     tags: [Service]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Service ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ServiceUpdateSchema'
+ *     responses:
+ *       204:
+ *         description: Service updated
+ *       400:
+ *         description: Service ID is required or No fields to update provided
+ *       500:
+ *         description: Internal server error
+ */
 export const updateServiceHandler = async (req, res) => {
     try {
         const { id: serviceID } = req.params;
@@ -96,6 +191,27 @@ export const updateServiceHandler = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /services/{id}:
+ *   delete:
+ *     summary: Delete service by ID
+ *     tags: [Service]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Service ID
+ *     responses:
+ *       204:
+ *         description: Service deleted
+ *       400:
+ *         description: Service ID is required
+ *       500:
+ *         description: Internal server error
+ */
 export const deleteServiceHandler = async (req, res) => {
     try {
         const { id: serviceID } = req.params;
@@ -112,6 +228,33 @@ export const deleteServiceHandler = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /services/user/{userID}:
+ *   get:
+ *     summary: Get services by user ID
+ *     tags: [Service]
+ *     parameters:
+ *       - in: path
+ *         name: userID
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: List of services by user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ServiceCreateSchema'
+ *       400:
+ *         description: User ID is required
+ *       500:
+ *         description: Internal server error
+ */
 export const getServicesByUserHandler = async (req, res) => {
     try {
         const { userID } = req.params;
