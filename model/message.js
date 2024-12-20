@@ -4,7 +4,7 @@ export const createMessage = async ({ conversationID, senderID, content, pool })
     
     console.log("dans create : ",conversationID, senderID, content);
     if (!conversationID || !senderID || !content) {
-        throw new Error('Les paramètres conversationID, senderID, et content sont requis');
+        throw new Error('conversationID, senderID and content are required');
     }
     const query = `
     INSERT INTO Message (conversationID, senderID, content, sendDate)
@@ -38,7 +38,7 @@ export const getMessagesByConversation = async ({ conversationID, pool }) => {
     const values = [conversationID];
 
     const result = await pool.query(query, values);
-    return result.rows;  // Retourne les messages de la conversation
+    return result.rows; 
 };
 
 export const deleteMessage = async ({ messageID, pool }) => {
@@ -50,8 +50,23 @@ export const deleteMessage = async ({ messageID, pool }) => {
     const values = [messageID];
 
     const result = await pool.query(query, values);
-    return result.rowCount > 0;  // Retourne true si le message a été supprimé
+    return result.rowCount > 0;
 };
+
+
+export const deleteMessages = async (SQLClient, userID) => {
+    try {
+        await SQLClient.query(`
+            DELETE FROM Message
+            WHERE conversationID IN (
+                SELECT conversationID FROM Conversation WHERE user1 = $1 OR user2 = $1
+            )
+        `, [userID]);
+    } catch (error) {
+        throw new Error(`Failed to delete messages: ${error.message}`);
+    }
+};
+
 
 export const getLastMessageByConversation = async ({ conversationID, pool }) => {
     const query = `
@@ -75,7 +90,7 @@ export const getLastMessageByConversation = async ({ conversationID, pool }) => 
     const values = [conversationID];
 
     const result = await pool.query(query, values);
-    return result.rows[0];  // Retourne le dernier message de la conversation
+    return result.rows[0];
 };
 
 export const updateMessage = async ({ messageID, content, pool }) => {
@@ -88,5 +103,5 @@ export const updateMessage = async ({ messageID, content, pool }) => {
     const values = [content, messageID];
 
     const result = await pool.query(query, values);
-    return result.rows[0];  // Retourne le message modifié
+    return result.rows[0];
 }

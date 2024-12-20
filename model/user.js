@@ -18,7 +18,6 @@ export const userExistsTel = async (SQLClient, { telNumber }) => {
 
 export const createUser = async (SQLClient, { lastName, firstName, telNumber, mailAddress, userPassword }) => {
 
-    // assigner les valeurs par défaut
     const isAdmin = false;
 
     const {rows} = await SQLClient.query(
@@ -95,54 +94,6 @@ export const updateMyInfo = async (SQLClient, userID, user) => {
     }
 };
 
-export const deleteMyAccount = async (SQLClient, userid) => {
-    try {
-        // Commencez une transaction
-        await SQLClient.query('BEGIN');
-
-        // Supprimez les messages associés aux conversations de l'utilisateur
-        await SQLClient.query(`
-            DELETE FROM Message
-            WHERE conversationID IN (
-                SELECT conversationID FROM Conversation WHERE user1 = $1 OR user2 = $1
-            )
-        `, [userid]);
-
-        // Supprimez les conversations de l'utilisateur
-        await SQLClient.query(`
-            DELETE FROM Conversation
-            WHERE user1 = $1 OR user2 = $1
-        `, [userid]);
-
-        // Supprimez les services de l'utilisateur
-        await SQLClient.query(`
-            DELETE FROM Service
-            WHERE authoruser = $1
-        `, [userid]);
-
-        // Supprimez les demandes de service de l'utilisateur
-        await SQLClient.query(`
-            DELETE FROM Service
-            WHERE provideruser = $1
-        `, [userid]);
-
-        // Supprimez l'utilisateur
-        await SQLClient.query(`
-            DELETE FROM AppUser
-            WHERE userid = $1
-        `, [userid]);
-
-        // Validez la transaction
-        await SQLClient.query('COMMIT');
-
-        return { message: 'Account and related data deleted successfully' };
-    } catch (error) {
-        // Effectuez un rollback en cas d'erreur
-        await SQLClient.query('ROLLBACK');
-        throw new Error(`Account not deleted : ${error.message}`);
-    }
-};
-
 
 // Requêtes pour les administrateurs
 
@@ -163,7 +114,7 @@ export const createUserAdmin = async (SQLClient, {lastName, firstName, telNumber
 };
 
 export const readAdminByEmail = async (SQLClient, {mailAddress}) => {
-    // verifier si l'utilisateur est un admin
+
     const isAdmin = true
 
     const {rows} = await SQLClient.query('SELECT * FROM AppUser WHERE mailAddress = $1 AND isAdmin = $2' , [mailAddress,isAdmin]);
@@ -211,5 +162,16 @@ export const updateUser = async (SQLClient, userID, {lastName, firstName, telNum
         return rows[0];
     } else {
         throw new Error('No field given');
+    }
+};
+
+export const deleteUser = async (SQLClient, userID) => {
+    try {
+        await SQLClient.query(`
+            DELETE FROM AppUser
+            WHERE userid = $1
+        `, [userID]);
+    } catch (error) {
+        throw new Error(`Failed to delete user: ${error.message}`);
     }
 };

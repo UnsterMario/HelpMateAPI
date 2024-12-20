@@ -6,7 +6,6 @@ import {
     checkAuth,
     getMyInfo,
     updateMe,
-    deleteMe,
     getUserById,
     registerUserWithService,
     //admin user
@@ -147,7 +146,7 @@ router.patch('/me', checkJWT, UVM.update, updateMe);
  *       500:
  *         description: Internal server error
  */
-router.delete('/me', checkJWT, deleteMe);
+router.delete('/me', checkJWT, deleteUser);
 
 /**
  * @swagger

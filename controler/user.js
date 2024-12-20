@@ -3,6 +3,9 @@ import * as userModel from '../model/user.js';
 import {createService} from '../model/service.js';
 import {sign, verify} from '../util/jwt.js';
 import {readPerson, readAdmin} from '../model/person.js';
+import { deleteMessages } from '../model/message.js';
+import { deleteConversations } from '../model/conversation.js';
+import { deleteUserServices } from '../model/service.js';
 
 
 /**
@@ -227,17 +230,52 @@ export const updateMe = async (req, res) => {
  *         description: User deleted successfully
  *       500:
  *         description: Internal server error
- */
-export const deleteMe = async (req, res) => {
-    const id = req.session;
+ */export const deleteUser = async (req, res) => {
+    let SQLClient;
     try {
-        await userModel.deleteMyAccount(pool, id);
-        res.status(200).json({ message: 'User deleted successfully' });
-    } catch (e) {
-        console.error('Error to delete user',e);
-        res.status(500).json({ message: 'Internal server error' });
+        // 1. Connexion à la base et début de la transaction
+        SQLClient = await pool.connect();
+        await SQLClient.query('BEGIN');
+        // 2. Déterminer l'ID utilisateur à supprimer
+        const userID = req.params.id || req.session; // Priorité à req.params.id
+        if (!userID) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        // 3. Suppression des données liées à l'utilisateur
+        await deleteMessages(SQLClient, userID);
+        await deleteConversations(SQLClient, userID);
+        await deleteUserServices(SQLClient, userID);
+        await userModel.deleteUser(SQLClient, userID);
+
+        // 4. Validation de la transaction
+        await SQLClient.query('COMMIT');
+
+        // 5. Réponse réussie
+        res.sendStatus(200);
+    } catch (err) {
+        console.error('Error during deletion:', err);
+
+        try {
+            // 6. ROLLBACK si une erreur survient
+            if (SQLClient) {
+                await SQLClient.query('ROLLBACK');
+            }
+        } catch (rollbackError) {
+            console.error('Rollback failed:', rollbackError);
+        } finally {
+            // 7. Réponse en cas d'erreur
+            res.sendStatus(500);
+        }
+    } finally {
+        // 8. Libération du client SQL
+        if (SQLClient) {
+            SQLClient.release();
+        }
     }
 };
+
+
 
 /**
  * @swagger
@@ -419,16 +457,6 @@ export const updateUser = async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-export const deleteUser = async (req, res) => {
-    try {
-        //on reprend le delete pour l'user mais l'admin insert l'id
-        await userModel.deleteMyAccount(pool, req.params.id);
-        res.sendStatus(204);
-    } catch (e) {
-        console.error('Error to delete user',e);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-};
 
 /**
  * @swagger

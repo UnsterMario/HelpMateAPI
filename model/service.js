@@ -92,6 +92,18 @@ export const deleteService = async (serviceID, pool) => {
   ]);
 };
 
+export const deleteUserServices = async (SQLClient, userID) => {
+  try {
+      await SQLClient.query(`
+          DELETE FROM Service
+          WHERE authoruser = $1 OR provideruser = $1
+      `, [userID]);
+  } catch (error) {
+      throw new Error(`Failed to delete services: ${error.message}`);
+  }
+};
+
+
 export const getAllServices = async (pool) => {
   const { rows } = await pool.query(`
         SELECT 
