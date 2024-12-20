@@ -272,7 +272,7 @@ export const updateMe = async (req, res) => {
 export const deleteMe = async (req, res) => {
     const id = req.session;
     try {
-        await userModel.deleteUser(pool, id);
+        await userModel.deleteMyAccount(pool, id);
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (e) {
         res.status(500).json({ message: 'Erreur serveur' });

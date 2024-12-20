@@ -7,14 +7,13 @@ import {
     checkAuth,
     getMyInfo,
     updateMe,
-    deleteMe,
     registerUserWithService,
     //admin user
     registrationAdmin,
     adminLogin,
     getAllUsers,
     updateUser,
-    deleteUser,
+    deleteMe,
     getUserById,
 } from '../controler/user.js';
 
@@ -144,62 +143,10 @@ router.get('/:id', getUserById);
  *         description: Unauthorized
  */
 router.patch('/me', checkJWT, UVM.update, updateMe);
+router.delete('/me', checkJWT, deleteMe);
+router.post('/auth',checkJWT, checkAuth);
+router.post('/registration-with-service', UVM.userWithService, registerUserWithService);
 
-/**
- * @swagger
- * /me:
- *   delete:
- *     summary: Delete my account
- *     tags: [User]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User deleted
- *       401:
- *         description: Unauthorized
- */
-router.delete('/me', checkJWT, deleteUser);
-
-/**
- * @swagger
- * /auth:
- *   post:
- *     summary: Check authentication
- *     tags: [User]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Authenticated
- *       401:
- *         description: Unauthorized
- */
-router.post('/auth', checkJWT, checkAuth);
-
-/**
- * @swagger
- * /admin/login:
- *   post:
- *     summary: Admin login
- *     tags: [Admin]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Successful login
- *       401:
- *         description: Unauthorized
- */
 // Routes pour les administrateurs
 router.post('/admin/login', UVM.login, adminLogin);
 
