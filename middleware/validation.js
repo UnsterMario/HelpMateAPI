@@ -2,6 +2,8 @@ import * as userValidator from './validator/user.js';
 import * as typeServiceValidator from './validator/typeservice.js';
 import * as serviceValidator from './validator/service.js';
 import * as aboutUsValidator from './validator/aboutus.js';
+import * as conversationValidator from './validator/conversation.js';
+import * as messageValidator from './validator/message.js';
 
 /**
  * @swagger
@@ -152,6 +154,36 @@ export const typeServiceValidatorMiddleware = {
     getByID: async (req, res, next) => {
         try {
             req.val = await typeServiceValidator.getByID.validate(req.params);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    }
+};
+
+export const conversationValidatorMiddleware = {
+    create: async (req, res, next) => {
+        try {
+            req.val = await conversationValidator.create.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+};
+
+export const messageValidatorMiddleware = {
+    create: async (req, res, next) => {
+        try {
+            req.val = await messageValidator.create.validate(req.body);
+            next();
+        } catch (e) {
+            res.status(400).send(e.messages);
+        }
+    },
+    update: async (req, res, next) => {
+        try {
+            req.val = await messageValidator.update.validate(req.body);
             next();
         } catch (e) {
             res.status(400).send(e.messages);

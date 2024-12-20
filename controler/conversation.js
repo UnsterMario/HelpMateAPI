@@ -1,4 +1,11 @@
-import { createConversation, getConversationsByUser, getConversationID, conversationExists, getAllConversations } from '../model/conversation.js';
+import { 
+    createConversation, 
+    getConversationsByUser, 
+    getConversationID, 
+    conversationExists, 
+    getAllConversations 
+} from '../model/conversation.js';
+
 import { pool } from '../database/database.js';
 
 export const createConversationHandler = async (req, res) => {
@@ -37,11 +44,11 @@ export const getAllConversationsHandler = async (req, res) => {
 }
 
 export const getConversationIDHandler = async (req, res) => {
-    const { user1, user2 } = req.params; // Get users from request parameters
+    const { user1, user2 } = req.params;
     try {
         const conversationID = await getConversationID({
-            user1: parseInt(user1, 10), // Parse as integers
-            user2: parseInt(user2, 10), // Parse as integers
+            user1: parseInt(user1, 10), // ICI pour moi c'est useless le ,10
+            user2: parseInt(user2, 10), 
             pool,
         });
 
@@ -57,11 +64,11 @@ export const getConversationIDHandler = async (req, res) => {
 };
 
 export const conversationExistsHandler = async (req, res) => {
-    const { user1, user2 } = req.params; // Récupération depuis req.params
+    const { user1, user2 } = req.params; 
     try {
         const exists = await conversationExists({ 
             pool, 
-            user1: parseInt(user1, 10), // Assurez-vous que ce sont des entiers
+            user1: parseInt(user1, 10), 
             user2: parseInt(user2, 10),
         });
         res.status(200).json({ exists });

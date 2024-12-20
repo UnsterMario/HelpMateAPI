@@ -41,7 +41,7 @@ export const checkAuth = async (req, res) => {
         }
 
         // Rechercher l'utilisateur dans la base de données
-        const user = await userModel.getUserByID(pool, decoded);
+        const user = await userModel.getUserByID(pool, decoded.userID);
 
         if (!user) {
             return res.status(401).json({ message: "Doesn't found an user" });
@@ -81,12 +81,13 @@ export const checkAuth = async (req, res) => {
  */
 export const login = async (req, res) => {
     try {
+        console.log('Req:', req.val);
         const rep = await readPerson(pool, {mailAddress: req.val.mailAddress, userPassword: req.val.userPassword});
         if(rep) {
             const jwt = sign(rep, {
                 expiresIn: '8h'
             });
-            res.status(201).json({ message: 'User logged in successfully', token: jwt, mailAddress: rep });
+            res.status(201).json({ message: 'User logged in successfully', token: jwt, userID: rep });
         } else {
             console.log('User not found');
             res.sendStatus(404);
@@ -130,7 +131,9 @@ export const registration = async (req, res) => {
         }
 
         const user = await userModel.createUser(pool, req.val);
-        const jwt = sign({ userID: user.userid }, { expiresIn: '8h' });
+        const jwt = sign({userID: user}, {
+            expiresIn: '8h'
+        });
         return res.status(201).json({ message: 'User created successfully', token: jwt });
     } catch (err) {
         console.error(err);
@@ -161,22 +164,18 @@ export const getMyInfo = async (req, res) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
         const decoded = verify(token);
-        console.log('Decoded:', decoded);
 
        // Vérifiez si le token décodé est un objet ou un nombre
        const id = typeof decoded === 'object' ? decoded.userID : decoded;
        if (!id) {
-           console.log('Token invalide');
-           return res.status(401).json({ message: 'Token invalide' });
+           return res.status(401).json({ message: 'Invalid token' });
        }
-        console.log('ID dans getMyInfo ish ish:', id);
 
         const info = await userModel.getUserByID(pool, id);
-        console.log('Info:', info);
         res.send(info);
     } catch (e) {
-        console.error('Erreur lors de la récupération des informations utilisateur:', e);
-        res.sendStatus(500);
+        console.error('Error to get all informations about user :', e);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -214,8 +213,8 @@ export const updateMe = async (req, res) => {
         }
         res.send(info);
     } catch (e) {
-        console.error(e);
-        res.sendStatus(500);
+        console.error('Error to update information about user',e);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -318,7 +317,8 @@ export const adminLogin = async (req, res) => {
             res.sendStatus(403); 
         }
     } catch (err) {
-        res.status(500).json({ message: 'Internal server error admin login' });
+        console.error('Error to admin login',err);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -354,11 +354,11 @@ export const registrationAdmin = async (req, res) => {
         } else {
             const newUser = await userModel.createUserAdmin(pool, req.val);
             // renvoyer l'utilisateur créé
-            res.json(newUser).status(201);
+            res.status(201).json(newUser);
         }
     } catch (err) {
-        console.error(err);
-        res.sendStatus(500);
+        console.error('Error to register admin',err);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -388,7 +388,8 @@ export const getAllUsers = async (req, res) => {
         const users = await userModel.getUsers(pool);
         res.json(users);
     } catch (e) {
-        res.sendStatus(500);
+        console.error('Error getting all users',e);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -423,9 +424,15 @@ export const getAllUsers = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const updatedUser = await userModel.updateUser(pool, req.params.id, req.val);
-        res.json(updatedUser).status(204);
+        if (updatedUser) {
+            res.status(200).json(updatedUser); // Réponse avec les données mises à jour
+        } else {
+            res.status(404).json({ message: 'User not found' }); // Cas où l'utilisateur n'existe pas
+        }
+        res.json(updatedUser).status(200);
     } catch (e) {
-        res.sendStatus(500);
+        console.error('Error updating user',e);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -487,7 +494,8 @@ export const getUserById = async (req, res) => {
             res.status(404).send('User not found'); 
         }
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error user by id admin' });
+        console.error('Error getting user by ID:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
