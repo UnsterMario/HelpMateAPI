@@ -2,6 +2,7 @@ import * as argon2 from 'argon2';
 
 
 export const hash = (password) => {
+    console.log(argon2.hash(password, {secret: Buffer.from(process.env.PEPPER)}));
     return argon2.hash(password, {secret: Buffer.from(process.env.PEPPER)});
 };
 
