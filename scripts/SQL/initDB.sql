@@ -171,7 +171,7 @@ CREATE TABLE Conversation (
     user2 INT NOT NULL,
     CONSTRAINT FK_Conversation_user1 FOREIGN KEY (user1) REFERENCES AppUser(userID) ON DELETE CASCADE,
     CONSTRAINT FK_Conversation_user2 FOREIGN KEY (user2) REFERENCES AppUser(userID) ON DELETE CASCADE,
-    CONSTRAINT CHK_Conversation_Order CHECK (user1 < user2)
+    CONSTRAINT CHK_Conversation_Order CHECK (user1 != user2)
 );
 
 -- Conversations entre les utilisateurs
