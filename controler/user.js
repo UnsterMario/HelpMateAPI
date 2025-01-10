@@ -84,9 +84,7 @@ export const login = async (req, res) => {
         console.log('Req:', req.val);
         const rep = await readPerson(pool, {mailAddress: req.val.mailAddress, userPassword: req.val.userPassword});
         if(rep) {
-            const jwt = sign(rep, {
-                expiresIn: '8h'
-            });
+            const jwt = sign({userID : rep}, { expiresIn: '8h'});
             res.status(201).json({ message: 'User logged in successfully', token: jwt, userID: rep });
         } else {
             console.log('User not found');
@@ -203,7 +201,7 @@ export const getMyInfo = async (req, res) => {
  */
 export const updateMe = async (req, res) => {
     try {
-        const info = await userModel.updateMyInfo(pool, req.session, req.val);
+        const info = await userModel.updateMyInfo(pool, req.session.userID, req.val);
         if ( info.detail && info.detail.startsWith('Key (mail')) {
             res.status(409).json({ message: 'Email already used' });
         }else {

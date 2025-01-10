@@ -10,9 +10,10 @@ import { pool } from '../database/database.js';
 
 export const createConversationHandler = async (req, res) => {
     const { user1, user2 } = req.body;
+    console.log(user1, user2);
     try {
-        if (user1 >= user2) {
-            return res.status(400).json({ error: 'user1 must be less than user2' });
+        if (user1 == user2) {
+            return res.status(400).json({ error: 'user1 must be different than user2' });
         }
         const conversation = await createConversation({ pool, user1, user2 });
         res.status(201).json({ message: 'Conversation created successfully', conversationID: conversation.conversationid });
