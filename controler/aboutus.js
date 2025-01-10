@@ -14,7 +14,6 @@ export const getText = async (req, res) => {
 
 export const updateText = async (req, res) => {
     try {
-        console.log(req.body.content);
         const aboutUs = await aboutUsModel.updateAboutUs(pool, {content:req.body.content});
         res.status(200).json(aboutUs);
     } catch (e) {

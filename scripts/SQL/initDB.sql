@@ -20,6 +20,7 @@ INSERT INTO AboutUs (content) VALUES (
     Rejoignez-nous dans cette aventure et devenez un acteur de l''entraide locale !'
 );
 
+
 DROP TABLE IF EXISTS AppUser CASCADE;
 
 
